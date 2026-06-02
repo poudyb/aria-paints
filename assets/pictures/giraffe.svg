@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 408 526" aria-label="Giraffe">
+  <defs>
+    <clipPath id="clip"><path d="M 339 26 L 277 35 L 294 58 L 218 168 L 66 265 L 37 368 L 57 414 L 69 297 L 84 486 L 109 485 L 98 368 L 134 479 L 161 481 L 123 380 L 136 322 L 178 315 L 181 485 L 208 488 L 215 309 L 234 468 L 269 486 L 250 238 L 305 92 L 369 107 Z"/></clipPath>
+  </defs>
+  <image href="assets/pictures/giraffe-art.png" xlink:href="assets/pictures/giraffe-art.png"
+    x="0" y="0" width="408" height="526" pointer-events="none"/>
+  <g clip-path="url(#clip)">
+  <path id="neckPatch1" class="paint-section" fill="#fff" stroke="#bbb" stroke-width="2" stroke-linejoin="round" d="M 108 102.9 L 115.9 110.5 L 127.5 113.4 L 122.3 122.7 L 124.3 133 L 112 132.7 L 101.9 138.7 L 97.3 128.9 L 86.4 123.6 L 95.1 116 L 96.2 105.3 Z"/>
+  <path id="neckPatch2" class="paint-section" fill="#fff" stroke="#bbb" stroke-width="2" stroke-linejoin="round" d="M 339 168.1 L 347.8 173.4 L 356.8 178.1 L 355.4 187 L 353.6 195.7 L 343.8 198.8 L 333.7 200.5 L 326 194.6 L 320.5 187.3 L 323.1 178.8 L 329.1 171.9 Z"/>
+  <path id="neckPatch3" class="paint-section" fill="#fff" stroke="#bbb" stroke-width="2" stroke-linejoin="round" d="M 59 178.6 L 66.8 186.7 L 78.6 189.4 L 73.4 198.8 L 75.1 208.9 L 63.1 209 L 53 214.3 L 47.7 205.3 L 38.2 199.5 L 45.2 191.7 L 47.8 182.2 Z"/>
+  <path id="neckPatch4" class="paint-section" fill="#fff" stroke="#bbb" stroke-width="2" stroke-linejoin="round" d="M 328 234.8 L 337.2 238.8 L 345.1 244.4 L 345.2 253.1 L 341.9 261.3 L 333 265.5 L 322.9 265.8 L 314.4 261.1 L 310.4 253.2 L 311.3 244.5 L 318.6 238.5 Z"/>
+  <path id="neckPatch5" class="paint-section" fill="#fff" stroke="#bbb" stroke-width="2" stroke-linejoin="round" d="M 199 245.2 L 210.3 243.1 L 212.9 252.6 L 219.4 260.5 L 210.7 266.6 L 204.7 274.6 L 194.5 270.9 L 183.8 269.2 L 183.1 259.9 L 181 251 L 190.1 246.3 Z"/>
+  <path id="bodyPatch1" class="paint-section" fill="#fff" stroke="#bbb" stroke-width="2" stroke-linejoin="round" d="M 109 251 L 112.5 254.3 L 117.7 255.6 L 115.4 259.8 L 116.2 264.3 L 110.8 264.2 L 106.3 266.9 L 104.2 262.5 L 99.4 260.2 L 103.3 256.8 L 103.7 252 Z"/>
+  <path id="bodyPatch2" class="paint-section" fill="#fff" stroke="#bbb" stroke-width="2" stroke-linejoin="round" d="M 85 262.7 L 88.4 266.5 L 93.9 267.6 L 91.2 271.8 L 92.4 276.4 L 86.8 276.1 L 82.3 278.9 L 80.3 274.5 L 75.4 272.2 L 79.3 268.8 L 79.8 264.1 Z"/>
+  <path id="bodyPatch3" class="paint-section" fill="#fff" stroke="#bbb" stroke-width="2" stroke-linejoin="round" d="M 143 257.3 L 152.3 261.7 L 161.2 266.9 L 159.7 276 L 158.3 285.3 L 147.7 287.5 L 137.2 290.8 L 130.7 283.1 L 122.3 276.5 L 128.4 268.3 L 131.6 258.9 Z"/>
+  <path id="bodyPatch4" class="paint-section" fill="#fff" stroke="#bbb" stroke-width="2" stroke-linejoin="round" d="M 110 274.8 L 117.2 281.5 L 127.5 284.2 L 122.9 292.6 L 124.6 301.8 L 113.6 301.6 L 104.5 306.9 L 100.3 298.1 L 90.6 293.4 L 98.4 286.5 L 99.4 276.9 Z"/>
+  <path id="bodyPatch5" class="paint-section" fill="#fff" stroke="#bbb" stroke-width="2" stroke-linejoin="round" d="M 105 311.2 L 110.1 316.3 L 117.7 318.1 L 114.2 324.1 L 115.7 330.8 L 107.6 330.5 L 101 334.6 L 98.1 328.1 L 90.9 324.7 L 96.7 319.8 L 97.3 312.8 Z"/>
+  <path id="bodyPatch6" class="paint-section" fill="#fff" stroke="#bbb" stroke-width="2" stroke-linejoin="round" d="M 321 319.5 L 331.6 323 L 339.4 329.9 L 340.7 339.4 L 336 348.1 L 326.7 353.6 L 315.5 352.9 L 305.4 348.5 L 302.1 339.3 L 301.9 329.6 L 310.8 323.6 Z"/>
+  <path id="bodyPatch7" class="paint-section" fill="#fff" stroke="#bbb" stroke-width="2" stroke-linejoin="round" d="M 159 335.9 L 164.8 337.3 L 168.9 341.1 L 169.5 346.3 L 167.4 351.2 L 161.9 353.5 L 155.8 354.2 L 151.3 350.7 L 147.6 346.4 L 149.9 341.5 L 152.7 336.7 Z"/>
+  <path id="bodyPatch8" class="paint-section" fill="#fff" stroke="#bbb" stroke-width="2" stroke-linejoin="round" d="M 156 357.8 L 162.4 359.6 L 167.1 363.7 L 167.5 369.4 L 165.4 374.9 L 159.2 377.3 L 152.4 378.3 L 147.6 374.2 L 143.3 369.6 L 146 364.1 L 148.9 358.7 Z"/>
+  </g>
+</svg>

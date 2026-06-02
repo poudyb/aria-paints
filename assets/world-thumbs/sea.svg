@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" aria-hidden="true">
+  <defs>
+    <linearGradient id="seaGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4fc3f7"/>
+      <stop offset="100%" stop-color="#0277bd"/>
+    </linearGradient>
+  </defs>
+  <rect width="320" height="200" fill="url(#seaGrad)"/>
+  <path fill="#26a69a" opacity="0.85" d="M30 165 Q35 120 42 90 Q48 130 52 175 Z"/>
+  <path fill="#00897b" opacity="0.9" d="M270 175 Q278 125 285 95 Q292 135 298 180 Z"/>
+  <path fill="#ff7043" opacity="0.8" d="M85 155 Q95 135 105 150 Q98 165 85 155Z"/>
+  <ellipse cx="240" cy="168" rx="14" ry="9" fill="#ffca28" stroke="#f57f17" stroke-width="1"/>
+  <path fill="#ab47bc" d="M195 172 Q200 150 208 158 Q202 172 195 172Z"/>
+  <g fill="#fff59d" stroke="#f9a825" stroke-width="1">
+    <ellipse cx="120" cy="55" rx="5" ry="5" opacity="0.7"/>
+    <ellipse cx="200" cy="40" rx="4" ry="4" opacity="0.6"/>
+    <ellipse cx="280" cy="65" rx="5" ry="5" opacity="0.65"/>
+  </g>
+  <g opacity="0.95" fill="#fff" stroke="#111" stroke-width="1.5">
+    <ellipse cx="75" cy="118" rx="22" ry="12"/>
+    <path d="M175 105 C195 95 215 108 205 125 C195 138 175 128 175 105Z"/>
+    <ellipse cx="255" cy="125" rx="18" ry="14"/>
+    <path d="M130 145 C160 130 200 140 220 155 C190 165 150 160 130 145Z"/>
+  </g>
+</svg>

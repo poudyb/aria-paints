@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" aria-label="Whale">
+  <path id="body" class="paint-section" fill="#fff" stroke="#111" stroke-width="2.5" stroke-linejoin="round"
+    d="M55 210 C80 140 200 115 310 150 C360 165 375 220 340 255 C270 320 120 300 70 255 C45 235 40 225 55 210 Z"/>
+  <path id="belly" class="paint-section" fill="#fff" stroke="#111" stroke-width="2"
+    d="M95 235 C170 275 280 265 320 220 C250 255 155 262 95 235 Z"/>
+  <path id="tail" class="paint-section" fill="#fff" stroke="#111" stroke-width="2.5" stroke-linejoin="round"
+    d="M48 210 L8 165 L12 255 Z"/>
+  <path id="flipper" class="paint-section" fill="#fff" stroke="#111" stroke-width="2"
+    d="M175 248 L140 295 L210 278 Z"/>
+  <circle id="eye" class="paint-section" cx="295" cy="178" r="14" fill="#fff" stroke="#111" stroke-width="2.5"/>
+  <path id="spout" class="paint-section" fill="#fff" stroke="#111" stroke-width="2.5" stroke-linecap="round"
+    d="M250 125 Q255 75 270 55 M265 125 Q280 85 295 70 M275 128 Q295 95 310 88"/>
+  <ellipse id="spot1" class="paint-section" cx="195" cy="205" rx="20" ry="14" fill="#fff" stroke="#111" stroke-width="2"/>
+  <ellipse id="spot2" class="paint-section" cx="240" cy="198" rx="16" ry="12" fill="#fff" stroke="#111" stroke-width="2"/>
+  <circle class="decor-line" cx="300" cy="178" r="5" fill="#111"/>
+</svg>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Aria Paints</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles/app.css">
+</head>
+<body>
+<div id="home-bg" aria-hidden="true">
+  <div class="home-bg__wash"></div>
+</div>
+<div id="home-brush" aria-hidden="true">
+  <img class="home-brush__img" src="assets/paintbrush.png" alt="" decoding="async">
+</div>
+<main id="app" aria-live="polite"></main>
+<div id="celebration-layer" aria-hidden="true"></div>
+<script src="data/catalog.js"></script>
+<script src="scripts/app.js"></script>
+</body>
+</html>

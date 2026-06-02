@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" aria-label="Fish">
+  <path id="body" class="paint-section" fill="#fff" stroke="#111" stroke-width="2.5" stroke-linejoin="round"
+    d="M95 200 C120 155 200 130 280 155 C330 170 350 200 330 225 C290 265 180 270 120 245 C85 228 80 215 95 200 Z"/>
+  <path id="tail" class="paint-section" fill="#fff" stroke="#111" stroke-width="2.5" stroke-linejoin="round"
+    d="M88 200 L25 165 L30 235 Z"/>
+  <path id="topFin" class="paint-section" fill="#fff" stroke="#111" stroke-width="2"
+    d="M175 145 L200 95 L225 148 Z"/>
+  <path id="sideFin" class="paint-section" fill="#fff" stroke="#111" stroke-width="2"
+    d="M210 218 L245 255 L185 248 Z"/>
+  <circle id="eye" class="paint-section" cx="285" cy="188" r="14" fill="#fff" stroke="#111" stroke-width="2.5"/>
+  <ellipse id="stripe1" class="paint-section" cx="195" cy="198" rx="22" ry="38" fill="#fff" stroke="#111" stroke-width="2"/>
+  <ellipse id="stripe2" class="paint-section" cx="245" cy="202" rx="18" ry="32" fill="#fff" stroke="#111" stroke-width="2"/>
+  <path id="lips" class="paint-section" fill="#fff" stroke="#111" stroke-width="2"
+    d="M318 195 Q340 200 318 205 Z"/>
+  <circle class="decor-line" cx="290" cy="188" r="5" fill="#111"/>
+</svg>

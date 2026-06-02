@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" aria-label="Dolphin">
+  <path id="body" class="paint-section" fill="#fff" stroke="#111" stroke-width="2.5" stroke-linejoin="round"
+    d="M70 220 C95 150 210 110 310 145 C355 160 365 210 330 245 C270 300 140 290 85 250 C55 230 55 235 70 220 Z"/>
+  <path id="belly" class="paint-section" fill="#fff" stroke="#111" stroke-width="2"
+    d="M120 235 C180 265 260 258 295 220 C250 248 175 255 120 235 Z"/>
+  <path id="dorsalFin" class="paint-section" fill="#fff" stroke="#111" stroke-width="2.5" stroke-linejoin="round"
+    d="M195 125 L220 70 L245 128 Z"/>
+  <path id="tail" class="paint-section" fill="#fff" stroke="#111" stroke-width="2.5" stroke-linejoin="round"
+    d="M58 228 L15 185 L18 268 Z"/>
+  <path id="flipper" class="paint-section" fill="#fff" stroke="#111" stroke-width="2"
+    d="M175 235 L145 275 L200 258 Z"/>
+  <circle id="eye" class="paint-section" cx="285" cy="168" r="13" fill="#fff" stroke="#111" stroke-width="2.5"/>
+  <path id="snout" class="paint-section" fill="#fff" stroke="#111" stroke-width="2.5" stroke-linejoin="round"
+    d="M310 165 C350 155 375 175 355 195 C335 210 315 195 310 165 Z"/>
+  <path id="splash" class="paint-section" fill="#fff" stroke="#111" stroke-width="2" stroke-linecap="round"
+    d="M355 175 Q375 165 385 180 M360 190 Q378 188 388 200"/>
+  <circle class="decor-line" cx="290" cy="168" r="5" fill="#111"/>
+</svg>

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1024 716" aria-label="Butterfly">
+  <image href="assets/pictures/butterfly-art.png" xlink:href="assets/pictures/butterfly-art.png"
+    x="0" y="0" width="1024" height="716" pointer-events="none"/>
+  <circle id="leftUpperSpot" class="paint-section" cx="192" cy="161" r="22.2" fill="#fff" stroke="#bbb" stroke-width="2"/>
+  <ellipse id="leftUpperOval" class="paint-section" cx="237" cy="204" rx="24" ry="36.8" fill="#fff" stroke="#bbb" stroke-width="2" transform="rotate(-171.1 237 204)"/>
+  <path id="leftUpperBlob" class="paint-section" fill="#fff" stroke="#bbb" stroke-width="2" stroke-linejoin="round" d="M 311.6 280 L 305 299 L 286 303.2 L 265.8 300.2 L 263.4 280 L 266.2 260.2 L 286 255.9 L 304.2 261.8 Z"/>
+  <circle id="leftUpperDot" class="paint-section" cx="369" cy="316" r="27.2" fill="#fff" stroke="#bbb" stroke-width="2"/>
+  <ellipse id="leftUpperInner" class="paint-section" cx="417" cy="343" rx="15.1" ry="23.1" fill="#fff" stroke="#bbb" stroke-width="2" transform="rotate(-197.6 417 343)"/>
+  <circle id="rightUpperSpot" class="paint-section" cx="787" cy="161" r="22.5" fill="#fff" stroke="#bbb" stroke-width="2"/>
+  <ellipse id="rightUpperOval" class="paint-section" cx="742" cy="204" rx="24" ry="36.8" fill="#fff" stroke="#bbb" stroke-width="2" transform="rotate(-13.3 742 204)"/>
+  <path id="rightUpperBlob" class="paint-section" fill="#fff" stroke="#bbb" stroke-width="2" stroke-linejoin="round" d="M 719.6 279 L 713 298 L 694 302.2 L 673.8 299.2 L 671.4 279 L 674.2 259.2 L 694 254.9 L 712.2 260.8 Z"/>
+  <circle id="rightUpperDot" class="paint-section" cx="613" cy="316" r="27.2" fill="#fff" stroke="#bbb" stroke-width="2"/>
+  <ellipse id="rightUpperInner" class="paint-section" cx="563" cy="343" rx="15.3" ry="23.4" fill="#fff" stroke="#bbb" stroke-width="2" transform="rotate(17.2 563 343)"/>
+  <circle id="leftLowerSpot" class="paint-section" cx="400" cy="457" r="27.2" fill="#fff" stroke="#bbb" stroke-width="2"/>
+  <ellipse id="leftLowerOval" class="paint-section" cx="243" cy="485" rx="12.5" ry="19.2" fill="#fff" stroke="#bbb" stroke-width="2" transform="rotate(134.3 243 485)"/>
+  <path id="leftLowerBlob" class="paint-section" fill="#fff" stroke="#bbb" stroke-width="2" stroke-linejoin="round" d="M 353.6 508 L 347 527 L 328 531.2 L 307.8 528.2 L 305.4 508 L 308.2 488.2 L 328 483.9 L 346.2 489.8 Z"/>
+  <circle id="leftLowerMid" class="paint-section" cx="334" cy="596" r="15" fill="#fff" stroke="#bbb" stroke-width="2"/>
+  <circle id="rightLowerSpot" class="paint-section" cx="579" cy="458" r="27.2" fill="#fff" stroke="#bbb" stroke-width="2"/>
+  <ellipse id="rightLowerOval" class="paint-section" cx="738" cy="486" rx="11.9" ry="18.2" fill="#fff" stroke="#bbb" stroke-width="2" transform="rotate(50.2 738 486)"/>
+  <path id="rightLowerBlob" class="paint-section" fill="#fff" stroke="#bbb" stroke-width="2" stroke-linejoin="round" d="M 677.6 509 L 671 528 L 652 532.2 L 631.8 529.2 L 629.4 509 L 632.2 489.2 L 652 484.9 L 670.2 490.8 Z"/>
+  <circle id="rightLowerMid" class="paint-section" cx="638" cy="597" r="13.6" fill="#fff" stroke="#bbb" stroke-width="2"/>
+</svg>

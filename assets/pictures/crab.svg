@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" aria-label="Crab">
+  <ellipse id="body" class="paint-section" cx="200" cy="230" rx="95" ry="72" fill="#fff" stroke="#111" stroke-width="2.5"/>
+  <path id="clawLeft" class="paint-section" fill="#fff" stroke="#111" stroke-width="2.5" stroke-linejoin="round"
+    d="M108 210 C55 175 35 130 55 105 C75 85 95 115 108 145 C115 165 115 195 108 210 Z"/>
+  <path id="clawRight" class="paint-section" fill="#fff" stroke="#111" stroke-width="2.5" stroke-linejoin="round"
+    d="M292 210 C345 175 365 130 345 105 C325 85 305 115 292 145 C285 165 285 195 292 210 Z"/>
+  <path id="legLeft" class="paint-section" fill="#fff" stroke="#111" stroke-width="2" stroke-linecap="round"
+    d="M140 285 L95 320 M155 295 L110 335 M170 300 L130 345"/>
+  <path id="legRight" class="paint-section" fill="#fff" stroke="#111" stroke-width="2" stroke-linecap="round"
+    d="M260 285 L305 320 M245 295 L290 335 M230 300 L270 345"/>
+  <circle id="eyeLeft" class="paint-section" cx="165" cy="205" r="16" fill="#fff" stroke="#111" stroke-width="2.5"/>
+  <circle id="eyeRight" class="paint-section" cx="235" cy="205" r="16" fill="#fff" stroke="#111" stroke-width="2.5"/>
+  <circle id="shellSpot" class="paint-section" cx="200" cy="235" r="28" fill="#fff" stroke="#111" stroke-width="2"/>
+  <circle class="decor-line" cx="165" cy="205" r="6" fill="#111"/>
+  <circle class="decor-line" cx="235" cy="205" r="6" fill="#111"/>
+</svg>
