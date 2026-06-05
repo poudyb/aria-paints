@@ -3,6 +3,7 @@ const PICTURE_CATALOG = {
     name: 'Butterfly',
     viewBox: '0 0 1024 716',
     sections: [
+      'wing-left-upper', 'wing-left-lower', 'wing-right-upper', 'wing-right-lower',
       'leftUpperSpot', 'leftUpperOval', 'leftUpperBlob', 'leftUpperDot', 'leftUpperInner',
       'rightUpperSpot', 'rightUpperOval', 'rightUpperBlob', 'rightUpperDot', 'rightUpperInner',
       'leftLowerSpot', 'leftLowerOval', 'leftLowerBlob', 'leftLowerMid',

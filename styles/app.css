@@ -334,6 +334,10 @@ button {
   display: block;
 }
 
+.paint-svg.paint-svg--butterfly .butterfly-art {
+  mix-blend-mode: multiply;
+}
+
 .paint-svg.paint-svg--giraffe {
   width: auto;
   height: auto;

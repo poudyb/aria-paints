@@ -1,5 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1024 716" aria-label="Butterfly">
-  <image href="assets/pictures/butterfly-art.png" xlink:href="assets/pictures/butterfly-art.png"
+  <path id="wing-left-upper" class="paint-section" fill="#fff" stroke="#bbb" stroke-width="2" d="M 139.0 120.0 L 133.0 145.0 L 178.0 248.0 L 195.0 357.0 L 461.0 357.0 L 404.0 258.0 L 307.0 165.0 L 199.0 112.0 Z"/>
+  <path id="wing-left-lower" class="paint-section" fill="#fff" stroke="#bbb" stroke-width="2" d="M 453.0 397.0 L 307.0 410.0 L 225.0 452.0 L 212.0 480.0 L 219.0 523.0 L 285.0 608.0 L 345.0 628.0 L 390.0 596.0 L 463.0 464.0 Z"/>
+  <path id="wing-right-upper" class="paint-section" fill="#fff" stroke="#bbb" stroke-width="2" d="M 844.0 125.0 L 821.0 110.0 L 780.0 112.0 L 672.0 165.0 L 583.0 249.0 L 518.0 357.0 L 784.0 357.0 L 800.0 252.0 L 843.0 158.0 Z"/>
+  <path id="wing-right-lower" class="paint-section" fill="#fff" stroke="#bbb" stroke-width="2" d="M 526.0 397.0 L 518.0 468.0 L 592.0 600.0 L 616.0 620.0 L 648.0 628.0 L 710.0 595.0 L 764.0 513.0 L 767.0 481.0 L 756.0 454.0 L 731.0 433.0 L 671.0 410.0 Z"/>
+  <image class="butterfly-art" href="assets/pictures/butterfly-art.png" xlink:href="assets/pictures/butterfly-art.png"
     x="0" y="0" width="1024" height="716" pointer-events="none"/>
   <circle id="leftUpperSpot" class="paint-section" cx="192" cy="161" r="22.2" fill="#fff" stroke="#bbb" stroke-width="2"/>
   <ellipse id="leftUpperOval" class="paint-section" cx="237" cy="204" rx="24" ry="36.8" fill="#fff" stroke="#bbb" stroke-width="2" transform="rotate(-171.1 237 204)"/>
