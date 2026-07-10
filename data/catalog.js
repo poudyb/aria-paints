@@ -12,11 +12,15 @@ const PICTURE_CATALOG = {
   },
   giraffe: {
     name: 'Giraffe',
-    viewBox: '0 0 408 526',
+    viewBox: '0 0 771 1024',
     sections: [
-      'neckPatch1', 'neckPatch2', 'neckPatch3', 'neckPatch4', 'neckPatch5',
-      'bodyPatch1', 'bodyPatch2', 'bodyPatch3', 'bodyPatch4',
-      'bodyPatch5', 'bodyPatch6', 'bodyPatch7', 'bodyPatch8'
+      'shape01', 'shape02', 'shape03', 'shape04', 'shape05', 'shape06', 'shape07', 'shape08',
+      'shape09', 'shape10', 'shape11', 'shape12', 'shape13', 'shape14', 'shape15', 'shape16',
+      'shape17', 'shape18', 'shape19', 'shape20', 'shape21', 'shape22', 'shape23', 'shape24',
+      'shape25', 'shape26', 'shape27', 'shape28', 'shape29', 'shape30', 'shape31', 'shape32',
+      'shape33', 'shape34', 'shape35', 'shape36', 'shape37', 'shape38', 'shape39', 'shape40',
+      'shape41', 'shape42', 'shape43', 'shape44', 'shape45', 'shape46', 'shape47', 'shape48',
+      'shape49', 'shape50', 'shape51'
     ]
   },
   house: {
@@ -55,10 +59,9 @@ const PICTURE_CATALOG = {
   }
 };
 
-const STANDALONE_PICTURE_IDS = ['butterfly'];
+const STANDALONE_PICTURE_IDS = ['butterfly', 'giraffe'];
 
 const COMING_SOON_ITEMS = [
-  { id: 'giraffe', label: 'Giraffe' },
   { id: 'house', label: 'House' },
   { id: 'fish', label: 'Fish' },
   { id: 'land', label: 'Land World' },

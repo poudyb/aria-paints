@@ -348,6 +348,10 @@ button {
   display: block;
 }
 
+.paint-svg.paint-svg--giraffe .giraffe-art {
+  mix-blend-mode: multiply;
+}
+
 .paint-section,
 .world-component .paint-section {
   cursor: pointer;
