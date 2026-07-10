@@ -154,7 +154,7 @@ function renderHome() {
   const page = el('section', 'page page--home');
   const hero = el('header', 'hero');
   hero.appendChild(el('h1', '', 'Aria Paints'));
-  hero.appendChild(el('p', '', 'Tap the butterfly to color!'));
+  hero.appendChild(el('p', '', 'Pick a picture to paint!'));
 
   const grid = el('div', 'home-grid');
 
