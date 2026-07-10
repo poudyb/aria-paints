@@ -24,6 +24,11 @@ from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
 MIN_REGION_AREA = 100
+DISPLAY_NAMES = {"christmasTree": "Christmas Tree"}
+# Some line art has hairline gaps in its outlines that would leak shapes into
+# the background; close them by thickening the lines this many pixels during
+# region detection (display art is untouched).
+GAP_CLOSE = {"turtle": 5}
 
 
 def contour_path(contour: np.ndarray) -> str:
@@ -61,7 +66,17 @@ def main() -> None:
     height, width = arr.shape[:2]
     is_white = (arr[:, :, 0] > 240) & (arr[:, :, 1] > 240) & (arr[:, :, 2] > 240)
 
-    n, labels, stats, _ = cv2.connectedComponentsWithStats(is_white.astype(np.uint8))
+    gap = GAP_CLOSE.get(picture, 1)
+    if gap > 1:
+        thick = cv2.dilate(
+            (~is_white).astype(np.uint8),
+            cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (gap, gap)),
+        )
+        detect_white = thick == 0
+    else:
+        detect_white = is_white
+
+    n, labels, stats, _ = cv2.connectedComponentsWithStats(detect_white.astype(np.uint8))
     regions = []
     background = np.zeros((height, width), bool)
     for i in range(1, n):
@@ -72,14 +87,17 @@ def main() -> None:
             regions.append((int(area), i))
     regions.sort(reverse=True)  # big regions first so small ones draw on top
 
-    all_region_pixels = np.isin(labels, [i for _, i in regions])
-
     section_ids: list[str] = []
     paths: list[str] = []
     for order, (_, comp) in enumerate(regions, start=1):
-        section_id = f"shape{order:02d}"
+        # Prefix with the picture id: several pictures can be in the DOM at
+        # once (home previews), and ids must be document-unique.
+        section_id = f"{picture}-shape{order:02d}"
         mask = (labels == comp).astype(np.uint8) * 255
-        forbidden = background | (all_region_pixels & (labels != comp))
+        # A section may only expand over outline pixels: every white pixel
+        # that isn't its own (background, other sections, sub-threshold
+        # slivers) is off limits.
+        forbidden = detect_white & (labels != comp)
         expanded = expand_under_outline(mask, is_white, forbidden)
         contours, _ = cv2.findContours(expanded, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         keep = [c for c in contours if cv2.contourArea(c) >= 25]
@@ -89,11 +107,12 @@ def main() -> None:
         section_ids.append(section_id)
         paths.append(f'  <path id="{section_id}" class="paint-section" fill="#fff" d="{d}"/>')
 
+    display_name = DISPLAY_NAMES.get(picture, picture.capitalize())
     art_href = f"assets/pictures/{picture}-art.png"
     svg = "\n".join(
         [
             f'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" '
-            f'viewBox="0 0 {width} {height}" aria-label="{picture.capitalize()}">',
+            f'viewBox="0 0 {width} {height}" aria-label="{display_name}">',
             *paths,
             f'  <image class="{picture}-art" href="{art_href}" xlink:href="{art_href}"',
             f'    x="0" y="0" width="{width}" height="{height}" pointer-events="none"/>',
@@ -110,7 +129,7 @@ def main() -> None:
     )
     replacement = (
         f"{picture}: {{\n"
-        f"    name: '{picture.capitalize()}',\n"
+        f"    name: '{display_name}',\n"
         f"    viewBox: '0 0 {width} {height}',\n"
         f"    sections: [\n      {sections_js}\n    ]\n"
         f"  }}"

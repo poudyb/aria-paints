@@ -352,6 +352,34 @@ button {
   mix-blend-mode: multiply;
 }
 
+.paint-svg.paint-svg--christmasTree {
+  width: auto;
+  height: auto;
+  max-width: min(92vw, 520px);
+  max-height: min(45vh, 28rem);
+  min-height: 0;
+  margin: 0 auto;
+  display: block;
+}
+
+.paint-svg.paint-svg--christmasTree .christmasTree-art {
+  mix-blend-mode: multiply;
+}
+
+.paint-svg.paint-svg--turtle {
+  width: auto;
+  height: auto;
+  max-width: min(92vw, 520px);
+  max-height: min(45vh, 28rem);
+  min-height: 0;
+  margin: 0 auto;
+  display: block;
+}
+
+.paint-svg.paint-svg--turtle .turtle-art {
+  mix-blend-mode: multiply;
+}
+
 .paint-section,
 .world-component .paint-section {
   cursor: pointer;

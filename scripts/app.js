@@ -80,11 +80,8 @@ function clonePictureSvg(pictureId, fills, onSectionClick, className) {
   const template = svgTemplateCache[pictureId];
   const svg = template.cloneNode(true);
   const classes = ['paint-svg'];
-  if (pictureId === 'butterfly' && className !== 'preview-svg') {
-    classes.push('paint-svg--butterfly');
-  }
-  if (pictureId === 'giraffe' && className !== 'preview-svg') {
-    classes.push('paint-svg--giraffe');
+  if (className !== 'preview-svg') {
+    classes.push('paint-svg--' + pictureId);
   }
   if (className) classes.push(className);
   svg.setAttribute('class', classes.join(' '));

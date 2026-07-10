@@ -14,13 +14,13 @@ const PICTURE_CATALOG = {
     name: 'Giraffe',
     viewBox: '0 0 771 1024',
     sections: [
-      'shape01', 'shape02', 'shape03', 'shape04', 'shape05', 'shape06', 'shape07', 'shape08',
-      'shape09', 'shape10', 'shape11', 'shape12', 'shape13', 'shape14', 'shape15', 'shape16',
-      'shape17', 'shape18', 'shape19', 'shape20', 'shape21', 'shape22', 'shape23', 'shape24',
-      'shape25', 'shape26', 'shape27', 'shape28', 'shape29', 'shape30', 'shape31', 'shape32',
-      'shape33', 'shape34', 'shape35', 'shape36', 'shape37', 'shape38', 'shape39', 'shape40',
-      'shape41', 'shape42', 'shape43', 'shape44', 'shape45', 'shape46', 'shape47', 'shape48',
-      'shape49', 'shape50', 'shape51'
+      'giraffe-shape01', 'giraffe-shape02', 'giraffe-shape03', 'giraffe-shape04', 'giraffe-shape05', 'giraffe-shape06', 'giraffe-shape07', 'giraffe-shape08',
+      'giraffe-shape09', 'giraffe-shape10', 'giraffe-shape11', 'giraffe-shape12', 'giraffe-shape13', 'giraffe-shape14', 'giraffe-shape15', 'giraffe-shape16',
+      'giraffe-shape17', 'giraffe-shape18', 'giraffe-shape19', 'giraffe-shape20', 'giraffe-shape21', 'giraffe-shape22', 'giraffe-shape23', 'giraffe-shape24',
+      'giraffe-shape25', 'giraffe-shape26', 'giraffe-shape27', 'giraffe-shape28', 'giraffe-shape29', 'giraffe-shape30', 'giraffe-shape31', 'giraffe-shape32',
+      'giraffe-shape33', 'giraffe-shape34', 'giraffe-shape35', 'giraffe-shape36', 'giraffe-shape37', 'giraffe-shape38', 'giraffe-shape39', 'giraffe-shape40',
+      'giraffe-shape41', 'giraffe-shape42', 'giraffe-shape43', 'giraffe-shape44', 'giraffe-shape45', 'giraffe-shape46', 'giraffe-shape47', 'giraffe-shape48',
+      'giraffe-shape49', 'giraffe-shape50', 'giraffe-shape51'
     ]
   },
   house: {
@@ -56,10 +56,28 @@ const PICTURE_CATALOG = {
     name: 'Whale',
     viewBox: '0 0 400 400',
     sections: ['body', 'belly', 'tail', 'flipper', 'eye', 'spout', 'spot1', 'spot2']
+  },
+  turtle: {
+    name: 'Turtle',
+    viewBox: '0 0 562 334',
+    sections: [
+      'turtle-shape01', 'turtle-shape02', 'turtle-shape03', 'turtle-shape04', 'turtle-shape05', 'turtle-shape06', 'turtle-shape07', 'turtle-shape08',
+      'turtle-shape09', 'turtle-shape10', 'turtle-shape11', 'turtle-shape12', 'turtle-shape13', 'turtle-shape14', 'turtle-shape15', 'turtle-shape16',
+      'turtle-shape17', 'turtle-shape18', 'turtle-shape19', 'turtle-shape20', 'turtle-shape21', 'turtle-shape22', 'turtle-shape23'
+    ]
+  },
+  christmasTree: {
+    name: 'Christmas Tree',
+    viewBox: '0 0 881 1024',
+    sections: [
+      'christmasTree-shape01', 'christmasTree-shape02', 'christmasTree-shape03', 'christmasTree-shape04', 'christmasTree-shape05', 'christmasTree-shape06', 'christmasTree-shape07', 'christmasTree-shape08',
+      'christmasTree-shape09', 'christmasTree-shape10', 'christmasTree-shape11', 'christmasTree-shape12', 'christmasTree-shape13', 'christmasTree-shape14', 'christmasTree-shape15', 'christmasTree-shape16',
+      'christmasTree-shape17', 'christmasTree-shape18', 'christmasTree-shape19', 'christmasTree-shape20', 'christmasTree-shape21', 'christmasTree-shape22', 'christmasTree-shape23', 'christmasTree-shape24'
+    ]
   }
 };
 
-const STANDALONE_PICTURE_IDS = ['butterfly', 'giraffe'];
+const STANDALONE_PICTURE_IDS = ['butterfly', 'giraffe', 'christmasTree', 'turtle'];
 
 const COMING_SOON_ITEMS = [
   { id: 'house', label: 'House' },
