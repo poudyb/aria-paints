@@ -288,13 +288,20 @@ button {
 
 .paint-layout {
   flex: 1;
+  /* Definite height so grid 1fr can size the canvas. Auto-height grids
+     collapse the middle row on iPad Safari when SVG intrinsic size is 0. */
+  height: calc(100dvh - 2 * clamp(1rem, 3vw, 1.6rem));
+  max-height: calc(100dvh - 2 * clamp(1rem, 3vw, 1.6rem));
   min-height: 0;
-  max-height: 100dvh;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
   gap: clamp(0.5rem, 1.6vw, 0.85rem);
   padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
   overflow: hidden;
+}
+
+.page.paint-layout {
+  min-height: 0;
 }
 
 .canvas-card {
@@ -308,6 +315,7 @@ button {
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  isolation: isolate;
 }
 
 .coloring-page {
@@ -324,60 +332,44 @@ button {
   background: #fff;
 }
 
-.paint-svg.paint-svg--butterfly {
-  width: auto;
+/* Tall line-art pages: keep an intrinsic aspect ratio so Safari does not
+   resolve width/height:auto to 0px inside the flex-centered canvas card. */
+.paint-svg.paint-svg--butterfly,
+.paint-svg.paint-svg--giraffe,
+.paint-svg.paint-svg--christmasTree,
+.paint-svg.paint-svg--turtle {
+  width: min(100%, 520px);
   height: auto;
-  max-width: min(92vw, 520px);
-  max-height: min(45vh, 28rem);
-  min-height: 0;
+  max-width: 100%;
+  max-height: min(45vh, 28rem, 100%);
+  min-height: unset;
   margin: 0 auto;
   display: block;
 }
 
-.paint-svg.paint-svg--butterfly .butterfly-art {
-  mix-blend-mode: multiply;
+.paint-svg.paint-svg--butterfly {
+  aspect-ratio: 1024 / 716;
 }
 
 .paint-svg.paint-svg--giraffe {
-  width: auto;
-  height: auto;
-  max-width: min(92vw, 520px);
-  max-height: min(45vh, 28rem);
-  min-height: 0;
-  margin: 0 auto;
-  display: block;
-}
-
-.paint-svg.paint-svg--giraffe .giraffe-art {
-  mix-blend-mode: multiply;
+  aspect-ratio: 771 / 1024;
 }
 
 .paint-svg.paint-svg--christmasTree {
-  width: auto;
-  height: auto;
-  max-width: min(92vw, 520px);
-  max-height: min(45vh, 28rem);
-  min-height: 0;
-  margin: 0 auto;
-  display: block;
-}
-
-.paint-svg.paint-svg--christmasTree .christmasTree-art {
-  mix-blend-mode: multiply;
+  aspect-ratio: 881 / 1024;
 }
 
 .paint-svg.paint-svg--turtle {
-  width: auto;
-  height: auto;
-  max-width: min(92vw, 520px);
-  max-height: min(45vh, 28rem);
-  min-height: 0;
-  margin: 0 auto;
-  display: block;
+  aspect-ratio: 562 / 334;
 }
 
-.paint-svg.paint-svg--turtle .turtle-art {
+.paint-svg .butterfly-art,
+.paint-svg .giraffe-art,
+.paint-svg .christmasTree-art,
+.paint-svg .turtle-art {
   mix-blend-mode: multiply;
+  /* Force a compositing layer so multiply blends reliably in WebKit. */
+  transform: translateZ(0);
 }
 
 .paint-section,
@@ -612,6 +604,11 @@ button {
     padding: 0.75rem;
   }
 
+  .page.paint-layout {
+    height: calc(100dvh - 1.5rem);
+    max-height: calc(100dvh - 1.5rem);
+  }
+
   .toolbar {
     justify-content: center;
   }
@@ -627,16 +624,13 @@ button {
     max-height: 54vh;
   }
 
-  .paint-svg.paint-svg--butterfly {
-    max-width: min(92vw, 520px);
-    max-height: min(42vh, 24rem);
-    min-height: 0;
-  }
-
-  .paint-svg.paint-svg--giraffe {
-    max-width: min(92vw, 520px);
-    max-height: min(42vh, 24rem);
-    min-height: 0;
+  .paint-svg.paint-svg--butterfly,
+  .paint-svg.paint-svg--giraffe,
+  .paint-svg.paint-svg--christmasTree,
+  .paint-svg.paint-svg--turtle {
+    width: min(100%, 520px);
+    max-height: min(42vh, 24rem, 100%);
+    min-height: unset;
   }
 
   .palette {
