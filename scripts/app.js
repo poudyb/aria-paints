@@ -17,6 +17,7 @@ const COLORS = [
 ];
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
+const XLINK_NS = 'http://www.w3.org/1999/xlink';
 const svgTemplateCache = {};
 
 const WORLDS = [
@@ -63,12 +64,35 @@ function pictureMeta(pictureId) {
 
 async function loadPictureTemplate(pictureId) {
   if (svgTemplateCache[pictureId]) return svgTemplateCache[pictureId];
-  const response = await fetch('assets/pictures/' + pictureId + '.svg');
+  const assetUrl = 'assets/pictures/' + pictureId + '.svg';
+  const response = await fetch(assetUrl);
   if (!response.ok) throw new Error('Missing picture asset: ' + pictureId);
   const text = await response.text();
   const doc = new DOMParser().parseFromString(text, 'image/svg+xml');
-  svgTemplateCache[pictureId] = doc.documentElement;
-  return doc.documentElement;
+  const root = doc.documentElement;
+  // Safari (esp. older iPadOS) resolves relative <image> hrefs against the
+  // DOMParser document, not the page — absolutize against the SVG URL.
+  const baseUrl = response.url || new URL(assetUrl, window.location.href).href;
+  absolutizeSvgImageHrefs(root, baseUrl);
+  svgTemplateCache[pictureId] = root;
+  return root;
+}
+
+function absolutizeSvgImageHrefs(svgRoot, baseUrl) {
+  const images = svgRoot.querySelectorAll('image');
+  for (let i = 0; i < images.length; i++) {
+    const img = images[i];
+    const href = img.getAttribute('href') || img.getAttributeNS(XLINK_NS, 'href');
+    if (!href || href.indexOf('data:') === 0 || href.indexOf('blob:') === 0) continue;
+    let absolute;
+    try {
+      absolute = new URL(href, baseUrl).href;
+    } catch (error) {
+      continue;
+    }
+    img.setAttribute('href', absolute);
+    img.setAttributeNS(XLINK_NS, 'href', absolute);
+  }
 }
 
 async function preloadPictures() {
@@ -94,7 +118,7 @@ function clonePictureSvg(pictureId, fills, onSectionClick, className) {
     if (!sectionId) return;
     node.setAttribute('fill', fills[sectionId] || '#fff');
     if (onSectionClick) {
-      node.addEventListener('click', function(event) {
+      bindTap(node, function(event) {
         event.stopPropagation();
         onSectionClick(sectionId);
       });
@@ -102,6 +126,27 @@ function clonePictureSvg(pictureId, fills, onSectionClick, className) {
   });
 
   return svg;
+}
+
+// Older iOS Safari sometimes drops click on SVG shapes; pair with touchend.
+function bindTap(node, handler) {
+  let touched = false;
+  node.style.cursor = 'pointer';
+  node.addEventListener('touchend', function(event) {
+    if (event.touches && event.touches.length > 0) return;
+    touched = true;
+    event.preventDefault();
+    handler(event);
+  }, { passive: false });
+  node.addEventListener('click', function(event) {
+    if (touched) {
+      touched = false;
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+    handler(event);
+  });
 }
 
 function buildPicturePreview(pictureId) {
@@ -392,7 +437,7 @@ function renderWorldSvg(world) {
       role: 'button',
       'aria-label': 'Paint ' + component.name
     });
-    group.addEventListener('click', function() {
+    bindTap(group, function() {
       renderWorldComponent(component.id);
     });
     const picture = clonePictureSvg(component.pictureId, fills, null);
@@ -505,8 +550,19 @@ function downloadSvg(filename, sourceSvg, title) {
   const sourceViewBox = sourceSvg.getAttribute('viewBox').split(' ').map(Number);
   const width = sourceViewBox[2];
   const height = sourceViewBox[3] + 48;
-  const exportSvg = svgEl('svg', { xmlns: SVG_NS, viewBox: '0 0 ' + width + ' ' + height, width, height });
-  exportSvg.appendChild(svgEl('rect', { x: 0, y: 0, width, height, fill: '#fff' }));
+  const exportSvg = svgEl('svg', {
+    xmlns: SVG_NS,
+    viewBox: '0 0 ' + width + ' ' + height,
+    width: String(width),
+    height: String(height)
+  });
+  exportSvg.appendChild(svgEl('rect', {
+    x: 0,
+    y: 0,
+    width: String(width),
+    height: String(height),
+    fill: '#fff'
+  }));
 
   Array.from(sourceSvg.children).forEach(function(child) {
     exportSvg.appendChild(child.cloneNode(true));
@@ -514,20 +570,20 @@ function downloadSvg(filename, sourceSvg, title) {
 
   const date = new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
   const label = svgEl('text', {
-    x: width / 2,
-    y: height - 16,
+    x: String(width / 2),
+    y: String(height - 16),
     'text-anchor': 'middle',
     'font-family': 'Arial, sans-serif',
-    'font-size': 18,
-    'font-weight': 700,
+    'font-size': '18',
+    'font-weight': '700',
     fill: '#4a148c'
   });
   label.textContent = title + ' • ' + date;
   exportSvg.appendChild(label);
 
   const serialized = new XMLSerializer().serializeToString(exportSvg);
-  const blob = new Blob([serialized], { type: 'image/svg+xml;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
+  // data: URLs are more reliable than blob: SVG → canvas on older Safari/iPad.
+  const url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(serialized);
   const img = new Image();
   img.onload = function() {
     const canvas = document.createElement('canvas');
@@ -537,13 +593,38 @@ function downloadSvg(filename, sourceSvg, title) {
     ctx.fillStyle = '#fff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    URL.revokeObjectURL(url);
-    const link = document.createElement('a');
-    link.download = filename;
-    link.href = canvas.toDataURL('image/png');
-    link.click();
+    savePngFromCanvas(canvas, filename);
+  };
+  img.onerror = function() {
+    window.alert('Could not create the PNG on this device. Try again or use another browser.');
   };
   img.src = url;
+}
+
+function savePngFromCanvas(canvas, filename) {
+  let dataUrl;
+  try {
+    dataUrl = canvas.toDataURL('image/png');
+  } catch (error) {
+    window.alert('Could not save the picture on this device.');
+    return;
+  }
+
+  // iPad/iPhone Safari often ignores <a download> for data URLs.
+  const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent)
+    || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (isIos) {
+    window.open(dataUrl, '_blank');
+    return;
+  }
+
+  const link = document.createElement('a');
+  link.download = filename;
+  link.href = dataUrl;
+  link.rel = 'noopener';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
 
 function celebrate() {
