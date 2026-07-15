@@ -99,6 +99,35 @@ async function preloadPictures() {
   await Promise.all(ALL_PICTURE_IDS.map(loadPictureTemplate));
 }
 
+function viewBoxSize(viewBox) {
+  const parts = String(viewBox || '').trim().split(/[\s,]+/);
+  if (parts.length !== 4) return null;
+  const width = Number(parts[2]);
+  const height = Number(parts[3]);
+  if (!width || !height) return null;
+  return { width: width, height: height };
+}
+
+function refreshSvgImages(svg) {
+  // WebKit can drop <image> loads from DOMParser-cloned SVGs until href is re-applied.
+  const images = svg.querySelectorAll('image');
+  for (let i = 0; i < images.length; i++) {
+    const image = images[i];
+    const href = image.getAttribute('href') || image.getAttributeNS(XLINK_NS, 'href');
+    if (!href) continue;
+    let absolute = href;
+    try {
+      absolute = new URL(href, window.location.href).href;
+    } catch (error) {
+      // Keep original href if URL parsing fails.
+    }
+    image.removeAttribute('href');
+    image.removeAttributeNS(XLINK_NS, 'href');
+    image.setAttribute('href', absolute);
+    image.setAttributeNS(XLINK_NS, 'href', absolute);
+  }
+}
+
 function clonePictureSvg(pictureId, fills, onSectionClick, className) {
   const meta = pictureMeta(pictureId);
   const template = svgTemplateCache[pictureId];
@@ -112,6 +141,18 @@ function clonePictureSvg(pictureId, fills, onSectionClick, className) {
   svg.setAttribute('role', 'img');
   svg.setAttribute('aria-label', meta.name);
   if (!svg.getAttribute('viewBox')) svg.setAttribute('viewBox', meta.viewBox);
+
+  // Explicit width/height keep Safari from treating the SVG as 0x0 in flex layouts.
+  const size = viewBoxSize(svg.getAttribute('viewBox') || meta.viewBox);
+  if (size) {
+    svg.setAttribute('width', String(size.width));
+    svg.setAttribute('height', String(size.height));
+  }
+  if (!svg.getAttribute('preserveAspectRatio')) {
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+  }
+
+  refreshSvgImages(svg);
 
   svg.querySelectorAll('.paint-section').forEach(function(node) {
     const sectionId = node.id;
