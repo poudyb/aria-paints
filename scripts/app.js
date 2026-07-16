@@ -587,7 +587,83 @@ function downloadButton(onClick) {
   return button;
 }
 
+function isIosDevice() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent)
+    || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
+function blobToDataUrl(blob) {
+  return new Promise(function(resolve, reject) {
+    const reader = new FileReader();
+    reader.onload = function() { resolve(reader.result); };
+    reader.onerror = function() { reject(reader.error || new Error('Could not read image data')); };
+    reader.readAsDataURL(blob);
+  });
+}
+
+function loadHtmlImage(url) {
+  return new Promise(function(resolve, reject) {
+    const img = new Image();
+    img.onload = function() { resolve(img); };
+    img.onerror = function() { reject(new Error('Could not render SVG for download')); };
+    img.src = url;
+  });
+}
+
+function canvasToPngBlob(canvas) {
+  return new Promise(function(resolve, reject) {
+    if (canvas.toBlob) {
+      canvas.toBlob(function(blob) {
+        if (blob) resolve(blob);
+        else reject(new Error('Could not create PNG'));
+      }, 'image/png');
+      return;
+    }
+    try {
+      const dataUrl = canvas.toDataURL('image/png');
+      const binary = atob(dataUrl.split(',')[1]);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      resolve(new Blob([bytes], { type: 'image/png' }));
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+// SVG-as-image cannot load external files; embed line-art PNGs as data URLs.
+async function inlineSvgImages(svgRoot) {
+  const images = svgRoot.querySelectorAll('image');
+  const tasks = [];
+  for (let i = 0; i < images.length; i++) {
+    tasks.push(inlineOneSvgImage(images[i]));
+  }
+  await Promise.all(tasks);
+}
+
+async function inlineOneSvgImage(image) {
+  const href = image.getAttribute('href') || image.getAttributeNS(XLINK_NS, 'href');
+  if (!href || href.indexOf('data:') === 0) return;
+  let absolute;
+  try {
+    absolute = new URL(href, window.location.href).href;
+  } catch (error) {
+    return;
+  }
+  const response = await fetch(absolute);
+  if (!response.ok) throw new Error('Could not load art for download');
+  const dataUrl = await blobToDataUrl(await response.blob());
+  image.setAttribute('href', dataUrl);
+  image.setAttributeNS(XLINK_NS, 'href', dataUrl);
+}
+
 function downloadSvg(filename, sourceSvg, title) {
+  exportSvgAsPng(filename, sourceSvg, title).catch(function() {
+    window.alert('Could not create the PNG on this device. Try again or use another browser.');
+  });
+}
+
+async function exportSvgAsPng(filename, sourceSvg, title) {
   const sourceViewBox = sourceSvg.getAttribute('viewBox').split(' ').map(Number);
   const width = sourceViewBox[2];
   const height = sourceViewBox[3] + 48;
@@ -622,50 +698,115 @@ function downloadSvg(filename, sourceSvg, title) {
   label.textContent = title + ' • ' + date;
   exportSvg.appendChild(label);
 
+  await inlineSvgImages(exportSvg);
+
   const serialized = new XMLSerializer().serializeToString(exportSvg);
   // data: URLs are more reliable than blob: SVG → canvas on older Safari/iPad.
   const url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(serialized);
-  const img = new Image();
-  img.onload = function() {
-    const canvas = document.createElement('canvas');
-    canvas.width = width * 2;
-    canvas.height = height * 2;
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    savePngFromCanvas(canvas, filename);
-  };
-  img.onerror = function() {
-    window.alert('Could not create the PNG on this device. Try again or use another browser.');
-  };
-  img.src = url;
+  const img = await loadHtmlImage(url);
+  const canvas = document.createElement('canvas');
+  canvas.width = width * 2;
+  canvas.height = height * 2;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  await savePngFromCanvas(canvas, filename);
 }
 
-function savePngFromCanvas(canvas, filename) {
-  let dataUrl;
+async function savePngFromCanvas(canvas, filename) {
+  const blob = await canvasToPngBlob(canvas);
+  let file = null;
   try {
-    dataUrl = canvas.toDataURL('image/png');
+    file = new File([blob], filename, { type: 'image/png' });
   } catch (error) {
-    window.alert('Could not save the picture on this device.');
+    file = null;
+  }
+
+  // iPad/iPhone: <a download> is ignored; window.open after async work is blocked.
+  // Web Share (Save Image / Files) is the reliable path when available.
+  if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file], title: 'Aria Paints' });
+      return;
+    } catch (error) {
+      if (error && error.name === 'AbortError') return;
+      // Fall through when share is blocked after async export.
+    }
+  }
+
+  if (isIosDevice()) {
+    showIosSaveSheet(blob, file, filename);
     return;
   }
 
-  // iPad/iPhone Safari often ignores <a download> for data URLs.
-  const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent)
-    || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  if (isIos) {
-    window.open(dataUrl, '_blank');
-    return;
-  }
-
+  const objectUrl = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.download = filename;
-  link.href = dataUrl;
+  link.href = objectUrl;
   link.rel = 'noopener';
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+  window.setTimeout(function() { URL.revokeObjectURL(objectUrl); }, 2000);
+}
+
+function showIosSaveSheet(blob, file, filename) {
+  const existing = document.querySelector('.save-sheet');
+  if (existing) existing.remove();
+
+  const objectUrl = URL.createObjectURL(blob);
+  const sheet = el('div', 'save-sheet');
+  sheet.setAttribute('role', 'dialog');
+  sheet.setAttribute('aria-modal', 'true');
+  sheet.setAttribute('aria-label', 'Save picture');
+
+  const panel = el('div', 'save-sheet__panel');
+  panel.appendChild(el('h2', 'save-sheet__title', 'Save your picture'));
+  panel.appendChild(el(
+    'p',
+    'save-sheet__hint',
+    'Tap Share to save to Photos, or touch and hold the image.'
+  ));
+
+  const preview = document.createElement('img');
+  preview.className = 'save-sheet__preview';
+  preview.src = objectUrl;
+  preview.alt = filename;
+  panel.appendChild(preview);
+
+  const actions = el('div', 'save-sheet__actions');
+  if (navigator.share) {
+    const shareBtn = el('button', 'download-btn', 'Share / Save');
+    shareBtn.type = 'button';
+    shareBtn.addEventListener('click', function() {
+      const payload = (file && navigator.canShare && navigator.canShare({ files: [file] }))
+        ? { files: [file], title: 'Aria Paints' }
+        : { title: 'Aria Paints', text: filename };
+      navigator.share(payload).then(close).catch(function(error) {
+        if (error && error.name === 'AbortError') return;
+      });
+    });
+    actions.appendChild(shareBtn);
+  }
+
+  const doneBtn = el('button', 'pill-btn', 'Done');
+  doneBtn.type = 'button';
+  doneBtn.addEventListener('click', close);
+  actions.appendChild(doneBtn);
+
+  panel.appendChild(actions);
+  sheet.appendChild(panel);
+  document.body.appendChild(sheet);
+
+  function close() {
+    sheet.remove();
+    URL.revokeObjectURL(objectUrl);
+  }
+
+  sheet.addEventListener('click', function(event) {
+    if (event.target === sheet) close();
+  });
 }
 
 function celebrate() {

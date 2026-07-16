@@ -783,6 +783,63 @@ button {
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
+/* iPad/iPhone fallback when <a download> / async window.open cannot save. */
+.save-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: rgba(40, 24, 72, 0.45);
+}
+
+.save-sheet__panel {
+  width: min(28rem, 100%);
+  max-height: min(90vh, 40rem);
+  overflow: auto;
+  padding: 1.25rem 1.35rem 1.35rem;
+  border-radius: 1.25rem;
+  background: #fff;
+  box-shadow: 0 16px 40px rgba(40, 24, 72, 0.28);
+  text-align: center;
+}
+
+.save-sheet__title {
+  margin: 0;
+  font-size: 1.35rem;
+  color: #5e35b1;
+}
+
+.save-sheet__hint {
+  margin: 0.45rem 0 1rem;
+  color: #5c5470;
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+
+.save-sheet__preview {
+  display: block;
+  width: 100%;
+  max-height: 50vh;
+  object-fit: contain;
+  border-radius: 0.75rem;
+  background: #f7f4ff;
+  /* Override body { -webkit-touch-callout: none } so iOS can Save Image. */
+  -webkit-touch-callout: default;
+  -webkit-user-select: auto;
+  user-select: auto;
+}
+
+.save-sheet__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  justify-content: center;
+  margin-top: 1.1rem;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
