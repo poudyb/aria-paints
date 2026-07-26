@@ -19,6 +19,15 @@ const COLORS = [
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const XLINK_NS = 'http://www.w3.org/1999/xlink';
 const svgTemplateCache = {};
+// Small patches near a tap fill together so tiny fingers can finish detailed
+// pictures faster. Large patches stay one-at-a-time.
+const sectionClusterCache = {};
+// A patch is "small" only if it is tiny vs both the biggest patch and the
+// whole picture — so body/wing-sized areas stay one tap.
+const SMALL_AREA_OF_LARGEST = 0.05;
+const SMALL_AREA_OF_VIEWBOX = 0.015;
+const NEIGHBOR_RADIUS_FACTOR = 2;
+const MAX_CLUSTER_NEIGHBORS = 8;
 
 const WORLDS = [
   {
@@ -521,15 +530,18 @@ function renderPaintScreen(options) {
   }));
 
   const card = el('div', 'canvas-card coloring-page');
-  card.appendChild(clonePictureSvg(options.pictureId, options.fills, function(sectionId) {
-    toggleFill(sectionId, options.fills);
+  const paintSvg = clonePictureSvg(options.pictureId, options.fills, function(sectionId) {
+    toggleFillCluster(options.pictureId, sectionId, options.fills);
     renderPaintScreen(options);
     if (isComplete(options.pictureId, options.fills)) celebrate();
-  }));
+  });
+  card.appendChild(paintSvg);
 
   page.appendChild(card);
   page.appendChild(renderPalette());
   app.appendChild(page);
+  // Measure after the SVG is in the document so getBBox works.
+  ensureSectionClusters(options.pictureId, paintSvg);
 }
 
 function renderPalette() {
@@ -560,6 +572,109 @@ function renderPalette() {
 function toggleFill(sectionId, fills) {
   if (fills[sectionId] === state.selectedColor) delete fills[sectionId];
   else fills[sectionId] = state.selectedColor;
+}
+
+function median(values) {
+  if (!values.length) return 0;
+  const sorted = values.slice().sort(function(a, b) { return a - b; });
+  const mid = Math.floor(sorted.length / 2);
+  if (sorted.length % 2) return sorted[mid];
+  return (sorted[mid - 1] + sorted[mid]) / 2;
+}
+
+function ensureSectionClusters(pictureId, svg) {
+  if (sectionClusterCache[pictureId]) return sectionClusterCache[pictureId];
+  sectionClusterCache[pictureId] = buildSectionClusters(svg);
+  return sectionClusterCache[pictureId];
+}
+
+function buildSectionClusters(svg) {
+  const nodes = Array.prototype.slice.call(svg.querySelectorAll('.paint-section')).filter(function(node) {
+    return !!node.id;
+  });
+  if (!nodes.length) return {};
+
+  const size = viewBoxSize(svg.getAttribute('viewBox'));
+  const viewBoxArea = size ? size.width * size.height : 0;
+
+  const metas = [];
+  for (let i = 0; i < nodes.length; i++) {
+    const node = nodes[i];
+    let box;
+    try {
+      box = node.getBBox();
+    } catch (error) {
+      continue;
+    }
+    const width = box.width;
+    const height = box.height;
+    if (!(width > 0 && height > 0)) continue;
+    metas.push({
+      id: node.id,
+      area: width * height,
+      cx: box.x + width / 2,
+      cy: box.y + height / 2,
+      diag: Math.hypot(width, height)
+    });
+  }
+
+  if (!metas.length) return {};
+
+  let maxArea = 0;
+  for (let i = 0; i < metas.length; i++) {
+    if (metas[i].area > maxArea) maxArea = metas[i].area;
+  }
+
+  const smalls = [];
+  for (let i = 0; i < metas.length; i++) {
+    const meta = metas[i];
+    const tinyVsLargest = meta.area < SMALL_AREA_OF_LARGEST * maxArea;
+    const tinyVsPicture = !viewBoxArea || meta.area < SMALL_AREA_OF_VIEWBOX * viewBoxArea;
+    meta.isSmall = tinyVsLargest && tinyVsPicture;
+    if (meta.isSmall) smalls.push(meta);
+  }
+
+  const radius = median(smalls.map(function(meta) { return meta.diag; })) * NEIGHBOR_RADIUS_FACTOR;
+  const clusters = {};
+
+  for (let i = 0; i < metas.length; i++) {
+    const meta = metas[i];
+    if (!meta.isSmall || !smalls.length || !(radius > 0)) {
+      clusters[meta.id] = [meta.id];
+      continue;
+    }
+
+    const neighbors = [];
+    for (let j = 0; j < smalls.length; j++) {
+      const other = smalls[j];
+      if (other.id === meta.id) continue;
+      const distance = Math.hypot(other.cx - meta.cx, other.cy - meta.cy);
+      if (distance <= radius) neighbors.push({ id: other.id, distance: distance });
+    }
+    neighbors.sort(function(a, b) { return a.distance - b.distance; });
+
+    const group = [meta.id];
+    const limit = Math.min(neighbors.length, MAX_CLUSTER_NEIGHBORS);
+    for (let k = 0; k < limit; k++) group.push(neighbors[k].id);
+    clusters[meta.id] = group;
+  }
+
+  return clusters;
+}
+
+function toggleFillCluster(pictureId, sectionId, fills) {
+  const clusters = sectionClusterCache[pictureId];
+  const group = (clusters && clusters[sectionId]) || [sectionId];
+  const clearing = fills[sectionId] === state.selectedColor;
+
+  for (let i = 0; i < group.length; i++) {
+    const id = group[i];
+    if (clearing) {
+      if (fills[id] === state.selectedColor) delete fills[id];
+    } else {
+      fills[id] = state.selectedColor;
+    }
+  }
 }
 
 function hasAnyFill(fills) {
