@@ -1,3 +1,31 @@
+function pictureMeta(pictureId) {
+  return PICTURE_CATALOG[pictureId];
+}
+
+// Complete clusters: tapping any member paints every other member too.
+function neighborCluster(ids) {
+  const neighbors = {};
+  ids.forEach(function(id) {
+    neighbors[id] = ids.filter(function(other) { return other !== id; });
+  });
+  return neighbors;
+}
+
+function mergeNeighbors() {
+  const out = {};
+  Array.prototype.forEach.call(arguments, function(map) {
+    Object.keys(map).forEach(function(key) {
+      out[key] = map[key];
+    });
+  });
+  return out;
+}
+
+function fillGroup(pictureId, sectionId) {
+  const neighbors = pictureMeta(pictureId).neighbors || {};
+  return [sectionId].concat(neighbors[sectionId] || []);
+}
+
 const PICTURE_CATALOG = {
   butterfly: {
     name: 'Butterfly',
@@ -9,26 +37,12 @@ const PICTURE_CATALOG = {
       'leftLowerSpot', 'leftLowerOval', 'leftLowerBlob', 'leftLowerMid',
       'rightLowerSpot', 'rightLowerOval', 'rightLowerBlob', 'rightLowerMid'
     ],
-    neighbors: {
-      'leftUpperSpot': ['leftUpperOval', 'leftUpperBlob', 'leftUpperDot', 'leftUpperInner'],
-      'leftUpperOval': ['leftUpperSpot', 'leftUpperBlob', 'leftUpperDot', 'leftUpperInner'],
-      'leftUpperBlob': ['leftUpperSpot', 'leftUpperOval', 'leftUpperDot', 'leftUpperInner'],
-      'leftUpperDot': ['leftUpperSpot', 'leftUpperOval', 'leftUpperBlob', 'leftUpperInner'],
-      'leftUpperInner': ['leftUpperSpot', 'leftUpperOval', 'leftUpperBlob', 'leftUpperDot'],
-      'rightUpperSpot': ['rightUpperOval', 'rightUpperBlob', 'rightUpperDot', 'rightUpperInner'],
-      'rightUpperOval': ['rightUpperSpot', 'rightUpperBlob', 'rightUpperDot', 'rightUpperInner'],
-      'rightUpperBlob': ['rightUpperSpot', 'rightUpperOval', 'rightUpperDot', 'rightUpperInner'],
-      'rightUpperDot': ['rightUpperSpot', 'rightUpperOval', 'rightUpperBlob', 'rightUpperInner'],
-      'rightUpperInner': ['rightUpperSpot', 'rightUpperOval', 'rightUpperBlob', 'rightUpperDot'],
-      'leftLowerSpot': ['leftLowerOval', 'leftLowerBlob', 'leftLowerMid'],
-      'leftLowerOval': ['leftLowerSpot', 'leftLowerBlob', 'leftLowerMid'],
-      'leftLowerBlob': ['leftLowerSpot', 'leftLowerOval', 'leftLowerMid'],
-      'leftLowerMid': ['leftLowerSpot', 'leftLowerOval', 'leftLowerBlob'],
-      'rightLowerSpot': ['rightLowerOval', 'rightLowerBlob', 'rightLowerMid'],
-      'rightLowerOval': ['rightLowerSpot', 'rightLowerBlob', 'rightLowerMid'],
-      'rightLowerBlob': ['rightLowerSpot', 'rightLowerOval', 'rightLowerMid'],
-      'rightLowerMid': ['rightLowerSpot', 'rightLowerOval', 'rightLowerBlob']
-    }
+    neighbors: mergeNeighbors(
+      neighborCluster(['leftUpperSpot', 'leftUpperOval', 'leftUpperBlob', 'leftUpperDot', 'leftUpperInner']),
+      neighborCluster(['rightUpperSpot', 'rightUpperOval', 'rightUpperBlob', 'rightUpperDot', 'rightUpperInner']),
+      neighborCluster(['leftLowerSpot', 'leftLowerOval', 'leftLowerBlob', 'leftLowerMid']),
+      neighborCluster(['rightLowerSpot', 'rightLowerOval', 'rightLowerBlob', 'rightLowerMid'])
+    )
   },
   giraffe: {
     name: 'Giraffe',
