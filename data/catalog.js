@@ -8,7 +8,27 @@ const PICTURE_CATALOG = {
       'rightUpperSpot', 'rightUpperOval', 'rightUpperBlob', 'rightUpperDot', 'rightUpperInner',
       'leftLowerSpot', 'leftLowerOval', 'leftLowerBlob', 'leftLowerMid',
       'rightLowerSpot', 'rightLowerOval', 'rightLowerBlob', 'rightLowerMid'
-    ]
+    ],
+    neighbors: {
+      'leftUpperSpot': ['leftUpperOval', 'leftUpperBlob', 'leftUpperDot', 'leftUpperInner'],
+      'leftUpperOval': ['leftUpperSpot', 'leftUpperBlob', 'leftUpperDot', 'leftUpperInner'],
+      'leftUpperBlob': ['leftUpperSpot', 'leftUpperOval', 'leftUpperDot', 'leftUpperInner'],
+      'leftUpperDot': ['leftUpperSpot', 'leftUpperOval', 'leftUpperBlob', 'leftUpperInner'],
+      'leftUpperInner': ['leftUpperSpot', 'leftUpperOval', 'leftUpperBlob', 'leftUpperDot'],
+      'rightUpperSpot': ['rightUpperOval', 'rightUpperBlob', 'rightUpperDot', 'rightUpperInner'],
+      'rightUpperOval': ['rightUpperSpot', 'rightUpperBlob', 'rightUpperDot', 'rightUpperInner'],
+      'rightUpperBlob': ['rightUpperSpot', 'rightUpperOval', 'rightUpperDot', 'rightUpperInner'],
+      'rightUpperDot': ['rightUpperSpot', 'rightUpperOval', 'rightUpperBlob', 'rightUpperInner'],
+      'rightUpperInner': ['rightUpperSpot', 'rightUpperOval', 'rightUpperBlob', 'rightUpperDot'],
+      'leftLowerSpot': ['leftLowerOval', 'leftLowerBlob', 'leftLowerMid'],
+      'leftLowerOval': ['leftLowerSpot', 'leftLowerBlob', 'leftLowerMid'],
+      'leftLowerBlob': ['leftLowerSpot', 'leftLowerOval', 'leftLowerMid'],
+      'leftLowerMid': ['leftLowerSpot', 'leftLowerOval', 'leftLowerBlob'],
+      'rightLowerSpot': ['rightLowerOval', 'rightLowerBlob', 'rightLowerMid'],
+      'rightLowerOval': ['rightLowerSpot', 'rightLowerBlob', 'rightLowerMid'],
+      'rightLowerBlob': ['rightLowerSpot', 'rightLowerOval', 'rightLowerMid'],
+      'rightLowerMid': ['rightLowerSpot', 'rightLowerOval', 'rightLowerBlob']
+    }
   },
   giraffe: {
     name: 'Giraffe',
