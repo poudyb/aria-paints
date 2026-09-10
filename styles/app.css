@@ -185,14 +185,15 @@ button {
 
 .home-grid {
   display: grid;
-  /* Fallback first: nested min() inside minmax() is invalid on older Safari. */
-  grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr));
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10.5rem), 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.85rem;
-  gap: clamp(0.75rem, 2.5vw, 1.15rem);
+  gap: clamp(0.55rem, 2vw, 1.2rem);
   align-items: stretch;
-  padding-bottom: 5rem;
-  padding-bottom: clamp(5rem, 16vw, 8rem);
+  width: 100%;
+  max-width: 66rem;
+  margin: 0 auto;
+  padding-bottom: 1rem;
+  padding-bottom: clamp(0.5rem, 3vw, 1.5rem);
 }
 
 .home-card {
@@ -223,24 +224,6 @@ button {
 
 .home-card--world:active {
   box-shadow: 0 4px 0 #1565c0, 0 8px 16px rgba(0, 0, 0, 0.16);
-}
-
-.home-card--coming-soon {
-  background: linear-gradient(160deg, #f5f5f5 0%, #eeeeee 55%, #e0e0e0 100%);
-  box-shadow: 0 6px 0 #9e9e9e, 0 10px 20px rgba(0, 0, 0, 0.12);
-  cursor: default;
-  pointer-events: none;
-  color: #616161;
-}
-
-.home-card--coming-soon:active {
-  transform: none;
-  box-shadow: 0 6px 0 #9e9e9e, 0 10px 20px rgba(0, 0, 0, 0.12);
-}
-
-.home-card__preview--coming-soon {
-  background: #fafafa;
-  border-color: rgba(0, 0, 0, 0.08);
 }
 
 .home-card__preview {
@@ -309,34 +292,6 @@ button {
   .home-card__thumb {
     position: static;
   }
-}
-
-.home-card__coming-soon {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: clamp(1rem, 3.6vw, 1.25rem);
-  font-weight: 700;
-  line-height: 1.2;
-  color: #757575;
-  padding: 0.35rem;
-  width: 100%;
-  text-align: center;
-}
-
-@supports (aspect-ratio: 4 / 3) {
-  .home-card__coming-soon {
-    position: static;
-    top: auto;
-    left: auto;
-    transform: none;
-    width: auto;
-  }
-}
-
-.home-card--coming-soon .home-card__name {
-  color: #616161;
 }
 
 .home-card__name {
@@ -478,6 +433,17 @@ button {
 
 .decor-line {
   pointer-events: none;
+}
+
+/* Butterfly wing dots live only in the SVG (the PNG has no spots). CSS
+   hides .paint-section strokes so they can be fat tap halos — these
+   non-interactive copies keep a coloring-page outline on top of fills. */
+.wing-dot-outline {
+  fill: none;
+  stroke: #111;
+  stroke-width: 3.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
 }
 
 .scene-sky,
@@ -719,6 +685,20 @@ button {
 @media (max-width: 760px) {
   #app {
     padding: 0.75rem;
+  }
+
+  .home-grid {
+    gap: 0.5rem;
+  }
+
+  .home-card {
+    padding: 0.35rem;
+    border-width: 3px;
+    border-radius: 16px;
+  }
+
+  .home-card__name {
+    font-size: clamp(0.72rem, 3.2vw, 1rem);
   }
 
   .page.paint-layout {

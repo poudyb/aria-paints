@@ -70,19 +70,6 @@ function homePictureCard(name, pictureId, onClick) {
   return button;
 }
 
-function homeComingSoonCard(name) {
-  const card = el('div', 'home-card home-card--coming-soon');
-  card.setAttribute('role', 'group');
-  card.setAttribute('aria-label', name + ', coming soon');
-
-  const preview = el('div', 'home-card__preview home-card__preview--coming-soon');
-  preview.appendChild(el('span', 'home-card__coming-soon', 'Coming soon'));
-
-  card.appendChild(preview);
-  card.appendChild(el('span', 'home-card__name', name));
-  return card;
-}
-
 function homeWorldCard(world, onClick) {
   const button = el('button', 'home-card home-card--world');
   button.type = 'button';

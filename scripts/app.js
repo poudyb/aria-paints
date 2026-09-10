@@ -27,10 +27,6 @@ function renderHome() {
     }));
   });
 
-  COMING_SOON_ITEMS.forEach(function(item) {
-    grid.appendChild(homeComingSoonCard(item.label));
-  });
-
   page.appendChild(hero);
   page.appendChild(grid);
   app.appendChild(page);

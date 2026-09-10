@@ -1,6 +1,6 @@
 function toggleFill(pictureId, sectionId, fills) {
-  // Little fingers are imprecise: a tap paints the tapped section plus its
-  // catalog-defined neighbors (nearby spots, adjacent fronds/petals/segments).
+  // A tap paints the catalog-defined static group (compound section or
+  // fully cross-linked neighbors), never nearby-by-proximity patches.
   const group = fillGroup(pictureId, sectionId);
   if (fills[sectionId] === state.selectedColor) {
     group.forEach(function(id) {
