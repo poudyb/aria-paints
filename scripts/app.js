@@ -522,7 +522,7 @@ function renderPaintScreen(options) {
 
   const card = el('div', 'canvas-card coloring-page');
   card.appendChild(clonePictureSvg(options.pictureId, options.fills, function(sectionId) {
-    toggleFill(sectionId, options.fills);
+    toggleFill(options.pictureId, sectionId, options.fills);
     renderPaintScreen(options);
     if (isComplete(options.pictureId, options.fills)) celebrate();
   }));
@@ -557,9 +557,18 @@ function renderPalette() {
   return palette;
 }
 
-function toggleFill(sectionId, fills) {
-  if (fills[sectionId] === state.selectedColor) delete fills[sectionId];
-  else fills[sectionId] = state.selectedColor;
+function toggleFill(pictureId, sectionId, fills) {
+  // Little fingers are imprecise: a tap paints the tapped section plus its
+  // catalog-defined neighbors (nearby spots, adjacent fronds/petals/segments).
+  const neighbors = pictureMeta(pictureId).neighbors || {};
+  const group = [sectionId].concat(neighbors[sectionId] || []);
+  if (fills[sectionId] === state.selectedColor) {
+    group.forEach(function(id) {
+      if (fills[id] === state.selectedColor) delete fills[id];
+    });
+  } else {
+    group.forEach(function(id) { fills[id] = state.selectedColor; });
+  }
 }
 
 function hasAnyFill(fills) {

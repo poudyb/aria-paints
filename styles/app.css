@@ -406,7 +406,6 @@ button {
 /* Tall line-art pages: keep an intrinsic aspect ratio so Safari does not
    resolve width/height:auto to 0px inside the flex-centered canvas card. */
 .paint-svg.paint-svg--butterfly,
-.paint-svg.paint-svg--giraffe,
 .paint-svg.paint-svg--christmasTree,
 .paint-svg.paint-svg--turtle {
   width: min(100%, 520px);
@@ -420,10 +419,6 @@ button {
 
 .paint-svg.paint-svg--butterfly {
   aspect-ratio: 1024 / 716;
-}
-
-.paint-svg.paint-svg--giraffe {
-  aspect-ratio: 771 / 1024;
 }
 
 .paint-svg.paint-svg--christmasTree {
@@ -443,10 +438,40 @@ button {
   transform: translateZ(0);
 }
 
+.paint-svg.paint-svg--giraffe,
+.paint-svg.paint-svg--house,
+.paint-svg.paint-svg--seaworld {
+  width: auto;
+  height: auto;
+  max-width: min(96vw, 980px);
+  max-height: min(58vh, 36rem, 100%);
+  min-height: unset;
+  margin: 0 auto;
+  display: block;
+}
+
+.paint-svg.paint-svg--giraffe {
+  aspect-ratio: 1024 / 618;
+}
+
+.paint-svg.paint-svg--house {
+  aspect-ratio: 1024 / 576;
+}
+
+.paint-svg.paint-svg--seaworld {
+  aspect-ratio: 1000 / 600;
+}
+
 .paint-section,
 .world-component .paint-section {
   cursor: pointer;
   transition: fill 0.12s ease;
+  /* Invisible fat stroke = generous tap target for small fingers. Small
+     sections come later in the SVG, so their halo wins over big ones. */
+  stroke: transparent;
+  stroke-width: 16;
+  stroke-linejoin: round;
+  stroke-linecap: round;
 }
 
 .decor-line {
@@ -717,11 +742,18 @@ button {
   }
 
   .paint-svg.paint-svg--butterfly,
-  .paint-svg.paint-svg--giraffe,
   .paint-svg.paint-svg--christmasTree,
   .paint-svg.paint-svg--turtle {
     width: min(100%, 520px);
     max-height: min(42vh, 24rem, 100%);
+    min-height: unset;
+  }
+
+  .paint-svg.paint-svg--giraffe,
+  .paint-svg.paint-svg--house,
+  .paint-svg.paint-svg--seaworld {
+    max-width: 96vw;
+    max-height: min(55vh, 34rem, 100%);
     min-height: unset;
   }
 
