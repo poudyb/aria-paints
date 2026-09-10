@@ -433,6 +433,7 @@ button {
 .paint-svg .giraffe-art,
 .paint-svg .christmasTree-art,
 .paint-svg .turtle-art,
+.paint-svg .house-art,
 .paint-svg .seaworld-art {
   mix-blend-mode: multiply;
   /* Force a compositing layer so multiply blends reliably in WebKit. */
@@ -456,7 +457,7 @@ button {
 }
 
 .paint-svg.paint-svg--house {
-  aspect-ratio: 1024 / 576;
+  aspect-ratio: 1024 / 574;
 }
 
 .paint-svg.paint-svg--seaworld {

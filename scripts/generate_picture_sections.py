@@ -44,6 +44,25 @@ WHITE_FILL_ENCLOSED = {"seaworld"}
 INK_THRESH = {"seaworld": 55}
 # Extra local-contrast ink: navy outlines on blue water are not always < thresh.
 LOCAL_INK = {"seaworld"}
+# Pictures that get a child-friendly `neighbors` map in the catalog: tapping a
+# section also paints its neighbors, so imprecise taps color 2-3 patches.
+NEIGHBOR_PICTURES = {"giraffe", "house"}
+# Neighbors must stay inside the same object (one animal, never two creatures).
+CLUSTER_NEIGHBORS = {"house"}
+CLUSTER_DILATE = {"seaworld": 21}
+# House objects are far apart; assign clusters from spatial boxes so a tap
+# never colors across the sun / bow / flower / house / palm.
+HOUSE_OBJECT_BOXES = (
+    (1, (70, 10, 220, 160)),    # sun
+    (2, (370, 0, 540, 140)),    # bow
+    (3, (0, 280, 230, 574)),    # flower
+    (4, (250, 140, 680, 574)),  # house
+    (5, (700, 0, 1024, 574)),   # palm
+)
+HOUSE_SUN_BOX = HOUSE_OBJECT_BOXES[0][1]
+HOUSE_BOW_BOX = HOUSE_OBJECT_BOXES[1][1]
+# Sun is exactly two independent elements (all rays, then the disc).
+HOUSE_SKIP_NEIGHBOR_CLUSTERS = {1}
 # Sea World: each animal is one paint-section. Boxes are in art-pixel coords
 # (794x794) so nearby creatures (octopus/fish, two whales/dolphins) stay apart.
 SEAWORLD_OBJECT_BOXES = (
@@ -57,9 +76,6 @@ SEAWORLD_OBJECT_BOXES = (
     (8, (520, 560, 794, 794)),   # crab (bottom-right)
 )
 SEAWORLD_MIN_REGION_AREA = 120
-# Pictures that get a child-friendly `neighbors` map in the catalog: tapping a
-# section also paints its neighbors, so imprecise taps color 2-3 patches.
-NEIGHBOR_PICTURES = {"giraffe"}
 MAX_NEIGHBORS = 2
 # Neighbors must be reasonably close (fraction of the image diagonal) and,
 # preferably, of similar size (spots pair with spots, fronds with fronds).
@@ -113,6 +129,33 @@ def white_fill_enclosed(
     out[fill] = (255, 255, 255)
     waves = (~fill) & (ink == 0)
     return out, waves
+
+
+def assign_clusters(masks: list[np.ndarray], dilate_px: int) -> list[int]:
+    """Group region masks that belong to the same object (one animal)."""
+    if not masks:
+        return []
+    height, width = masks[0].shape
+    union = np.zeros((height, width), np.uint8)
+    for mask in masks:
+        union = np.maximum(union, (mask > 0).astype(np.uint8) * 255)
+    dilated = cv2.dilate(
+        union, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (dilate_px, dilate_px))
+    )
+    _, labels = cv2.connectedComponents(dilated)
+    clusters: list[int] = []
+    for mask in masks:
+        labs, counts = np.unique(labels[mask > 0], return_counts=True)
+        best = 0
+        best_count = -1
+        for lab, count in zip(labs, counts):
+            if lab == 0:
+                continue
+            if int(count) > best_count:
+                best = int(lab)
+                best_count = int(count)
+        clusters.append(best)
+    return clusters
 
 
 def expand_under_outline(
@@ -236,11 +279,70 @@ def _in_box(cx: float, cy: float, box: tuple[int, int, int, int]) -> bool:
     return x0 <= cx <= x1 and y0 <= cy <= y1
 
 
+def house_cluster(cx: float, cy: float) -> int:
+    for cluster, box in HOUSE_OBJECT_BOXES:
+        if _in_box(cx, cy, box):
+            return cluster
+    return 0
+
+
 def seaworld_cluster(cx: float, cy: float) -> int:
     for cluster, box in SEAWORLD_OBJECT_BOXES:
         if _in_box(cx, cy, box):
             return cluster
     return 0
+
+
+def group_house_regions(
+    regions: list[tuple[int, np.ndarray]],
+) -> tuple[list[tuple[int, np.ndarray | list[np.ndarray]]], list[np.ndarray]]:
+    """Merge sun rays and the bow; drop the sun-box interior.
+
+    Child-facing rules: the sun is exactly two elements (all rays / the
+    disc), the bow is one element, and the box around the sun is outline
+    only (from the PNG overlay).
+    """
+    box_cx = (HOUSE_SUN_BOX[0] + HOUSE_SUN_BOX[2]) / 2.0
+    box_cy = (HOUSE_SUN_BOX[1] + HOUSE_SUN_BOX[3]) / 2.0
+
+    sun_large: list[tuple[float, int, np.ndarray]] = []
+    sun_rays: list[np.ndarray] = []
+    bow_masks: list[np.ndarray] = []
+    other: list[tuple[int, np.ndarray | list[np.ndarray]]] = []
+    dropped: list[np.ndarray] = []
+
+    for area, mask in regions:
+        cx, cy = _centroid(mask)
+        if _in_box(cx, cy, HOUSE_SUN_BOX):
+            if area > 1500:
+                dist = float(np.hypot(cx - box_cx, cy - box_cy))
+                sun_large.append((dist, area, mask))
+            else:
+                sun_rays.append(mask)
+        elif _in_box(cx, cy, HOUSE_BOW_BOX):
+            bow_masks.append(mask)
+        else:
+            other.append((area, mask))
+
+    # Closest large sun-box region to the box center is the disc; any
+    # other large pocket is the unpaintable interior around the sun.
+    sun_large.sort()
+    if sun_large:
+        _, area, mask = sun_large[0]
+        other.append((area, mask))
+        for _, _, extra in sun_large[1:]:
+            dropped.append(extra)
+
+    if sun_rays:
+        ray_area = int(sum(int((mask > 0).sum()) for mask in sun_rays))
+        other.append((ray_area, sun_rays))
+
+    if bow_masks:
+        bow_area = int(sum(int((mask > 0).sum()) for mask in bow_masks))
+        other.append((bow_area, bow_masks))
+
+    other.sort(key=lambda item: -item[0])
+    return other, dropped
 
 
 def group_seaworld_regions(
@@ -282,24 +384,33 @@ def _region_union(mask_or_masks: np.ndarray | list[np.ndarray]) -> np.ndarray:
 
 
 def compute_neighbors(
-    kept: list[tuple[str, int, float, float, bool]], width: int, height: int
+    kept: list[tuple[str, int, float, float, bool, int]],
+    width: int,
+    height: int,
+    cluster_only: bool,
+    skip_clusters: set[int] | None = None,
 ) -> dict[str, list[str]]:
     """Map each section to up to MAX_NEIGHBORS nearby sections to co-paint.
 
-    kept holds (section_id, area, cx, cy, is_background). Background sections
-    (open sky/ground bands) neither get nor become neighbors. Same-scale
-    sections are preferred so spots group with spots and fronds with fronds;
-    if a section has no similar-sized peer nearby (e.g. the sun disc, the
-    giraffe body), it falls back to its nearest small neighbors.
+    kept holds (section_id, area, cx, cy, is_background, cluster). Background
+    sections (open sky/ground bands) neither get nor become neighbors.
+    Same-scale sections are preferred so spots group with spots and fronds
+    with fronds; if a section has no similar-sized peer nearby (e.g. the sun
+    disc, the giraffe body), it falls back to its nearest small neighbors.
+    When cluster_only is set, neighbors stay inside the same object so a tap
+    never colors a different animal.
     """
+    skip_clusters = skip_clusters or set()
     max_dist = NEIGHBOR_DISTANCE_FRAC * float(np.hypot(width, height))
     neighbors: dict[str, list[str]] = {}
-    for sid, area, cx, cy, is_bg in kept:
-        if is_bg:
+    for sid, area, cx, cy, is_bg, cluster in kept:
+        if is_bg or cluster in skip_clusters:
             continue
         near: list[tuple[float, float, str]] = []
-        for osid, oarea, ocx, ocy, ois_bg in kept:
-            if ois_bg or osid == sid:
+        for osid, oarea, ocx, ocy, ois_bg, ocluster in kept:
+            if ois_bg or osid == sid or ocluster in skip_clusters:
+                continue
+            if cluster_only and ocluster != cluster:
                 continue
             dist = float(np.hypot(cx - ocx, cy - ocy))
             if dist > max_dist:
@@ -353,12 +464,15 @@ def main() -> None:
 
     regions = collect_regions(picture, detect_white, is_white, foreground)
     dropped_masks: list[np.ndarray] = []
-    if picture == "seaworld":
+    if picture == "house":
+        regions, dropped_masks = group_house_regions(regions)
+    elif picture == "seaworld":
         regions, dropped_masks = group_seaworld_regions(regions)
 
     section_ids: list[str] = []
     paths: list[str] = []
-    kept: list[tuple[str, int, float, float, bool]] = []
+    kept: list[tuple[str, int, float, float, bool, int]] = []
+    kept_masks: list[np.ndarray] = []
     region_unions = [_region_union(mask) for _, mask in regions]
     for order, ((area, mask), union) in enumerate(zip(regions, region_unions), start=1):
         # Prefix with the picture id: several pictures can be in the DOM at
@@ -385,7 +499,20 @@ def main() -> None:
         paths.append(f'  <path id="{section_id}" class="paint-section" fill="#fff" d="{d}"/>')
         ys, xs = np.nonzero(union)
         is_bg = foreground is not None and not bool(foreground[union > 0].any())
-        kept.append((section_id, area, float(xs.mean()), float(ys.mean()), is_bg))
+        kept.append((section_id, area, float(xs.mean()), float(ys.mean()), is_bg, 0))
+        kept_masks.append(union)
+
+    if picture == "house":
+        kept = [
+            (sid, area, cx, cy, is_bg, house_cluster(cx, cy))
+            for (sid, area, cx, cy, is_bg, _) in kept
+        ]
+    elif picture in CLUSTER_NEIGHBORS:
+        clusters = assign_clusters(kept_masks, CLUSTER_DILATE[picture])
+        kept = [
+            (sid, area, cx, cy, is_bg, cluster)
+            for (sid, area, cx, cy, is_bg, _), cluster in zip(kept, clusters)
+        ]
 
     display_name = DISPLAY_NAMES.get(picture, picture.capitalize())
     art_href = f"{picture}-art.png"
@@ -409,7 +536,13 @@ def main() -> None:
     )
     neighbors_js = ""
     if picture in NEIGHBOR_PICTURES:
-        neighbor_map = compute_neighbors(kept, width, height)
+        neighbor_map = compute_neighbors(
+            kept,
+            width,
+            height,
+            cluster_only=picture in CLUSTER_NEIGHBORS,
+            skip_clusters=HOUSE_SKIP_NEIGHBOR_CLUSTERS if picture == "house" else None,
+        )
         entries = ",\n      ".join(
             f"'{sid}': [{', '.join(chr(39) + n + chr(39) for n in ids)}]"
             for sid, ids in neighbor_map.items()
