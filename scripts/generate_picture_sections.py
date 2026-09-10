@@ -24,11 +24,11 @@ from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
 MIN_REGION_AREA = 100
-DISPLAY_NAMES = {"christmasTree": "Christmas Tree"}
+DISPLAY_NAMES = {"christmasTree": "Christmas Tree", "seaworld": "Sea World"}
 # Some line art has hairline gaps in its outlines that would leak shapes into
 # the background; close them by thickening the lines this many pixels during
 # region detection (display art is untouched).
-GAP_CLOSE = {"turtle": 5}
+GAP_CLOSE = {"turtle": 5, "seaworld": 5}
 # Pictures where the image edge acts as an invisible boundary: open regions
 # that run off the edge (sky, ground, mountains) become paintable instead of
 # being treated as background.
@@ -37,6 +37,26 @@ BORDER_FENCE = {"giraffe"}
 # invisible dividers placed in white gaps between horizon lines. (The current
 # giraffe scene has no horizon lines, so its open background stays one region.)
 BACKGROUND_DIVIDERS: set[str] = set()
+# Line art on a pre-colored background (seaworld waves): enclosed interiors
+# are not white, so flood-fill them to white in the overlay PNG, then trace
+# as usual. Open background stays unpaintable.
+WHITE_FILL_ENCLOSED = {"seaworld"}
+INK_THRESH = {"seaworld": 55}
+# Extra local-contrast ink: navy outlines on blue water are not always < thresh.
+LOCAL_INK = {"seaworld"}
+# Sea World: each animal is one paint-section. Boxes are in art-pixel coords
+# (794x794) so nearby creatures (octopus/fish, two whales/dolphins) stay apart.
+SEAWORLD_OBJECT_BOXES = (
+    (1, (0, 0, 300, 290)),       # leaping dolphin + splash (top-left)
+    (2, (300, 0, 794, 290)),     # large whale + spout (top-right)
+    (3, (0, 300, 185, 510)),     # octopus (mid-left)
+    (4, (185, 300, 380, 510)),   # angelfish (left-center)
+    (5, (400, 300, 660, 520)),   # small whale + spout (center-right)
+    (6, (660, 300, 794, 540)),   # small leaping dolphin (right)
+    (7, (180, 520, 450, 730)),   # angelfish (lower-left)
+    (8, (520, 560, 794, 794)),   # crab (bottom-right)
+)
+SEAWORLD_MIN_REGION_AREA = 120
 # Pictures that get a child-friendly `neighbors` map in the catalog: tapping a
 # section also paints its neighbors, so imprecise taps color 2-3 patches.
 NEIGHBOR_PICTURES = {"giraffe"}
@@ -52,6 +72,47 @@ def contour_path(contour: np.ndarray) -> str:
     approx = cv2.approxPolyDP(contour, max(0.5, 0.0004 * peri), True)
     pts = [(float(p[0][0]), float(p[0][1])) for p in approx]
     return "M " + " L ".join(f"{x:.1f} {y:.1f}" for x, y in pts) + " Z"
+
+
+def ink_mask(arr: np.ndarray, thresh: int, picture: str = "") -> np.ndarray:
+    gray = cv2.cvtColor(arr, cv2.COLOR_RGB2GRAY)
+    ink = gray < thresh
+    if picture in LOCAL_INK:
+        blur = cv2.GaussianBlur(gray, (21, 21), 0)
+        local = ((blur.astype(np.int16) - gray.astype(np.int16)) > 18) & (gray < 130)
+        ink = ink | local
+    return ink.astype(np.uint8) * 255
+
+
+def enclosed_interiors(ink: np.ndarray, gap: int) -> np.ndarray:
+    """Pixels inside closed outlines, not connected to the image border."""
+    thick = ink
+    if gap > 1:
+        thick = cv2.dilate(ink, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (gap, gap)))
+    pad = cv2.copyMakeBorder(thick, 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=0)
+    ph, pw = pad.shape
+    mask = np.zeros((ph + 2, pw + 2), np.uint8)
+    cv2.floodFill(pad, mask, (0, 0), 128)
+    background = pad[1:-1, 1:-1] == 128
+    return (thick == 0) & (~background)
+
+
+def white_fill_enclosed(
+    arr: np.ndarray, thresh: int, gap: int, picture: str = ""
+) -> tuple[np.ndarray, np.ndarray]:
+    """Paint enclosed interiors white so multiply-blend overlays work like giraffe."""
+    ink = ink_mask(arr, thresh, picture)
+    interiors = enclosed_interiors(ink, gap)
+    # Grow white up to the real ink, not into the colored background.
+    grown = cv2.dilate(
+        interiors.astype(np.uint8) * 255,
+        cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (9, 9)),
+    )
+    fill = (grown > 0) & (ink == 0)
+    out = arr.copy()
+    out[fill] = (255, 255, 255)
+    waves = (~fill) & (ink == 0)
+    return out, waves
 
 
 def expand_under_outline(
@@ -165,6 +226,61 @@ def collect_regions(
     return regions
 
 
+def _centroid(mask: np.ndarray) -> tuple[float, float]:
+    ys, xs = np.nonzero(mask)
+    return float(xs.mean()), float(ys.mean())
+
+
+def _in_box(cx: float, cy: float, box: tuple[int, int, int, int]) -> bool:
+    x0, y0, x1, y1 = box
+    return x0 <= cx <= x1 and y0 <= cy <= y1
+
+
+def seaworld_cluster(cx: float, cy: float) -> int:
+    for cluster, box in SEAWORLD_OBJECT_BOXES:
+        if _in_box(cx, cy, box):
+            return cluster
+    return 0
+
+
+def group_seaworld_regions(
+    regions: list[tuple[int, np.ndarray]],
+) -> tuple[list[tuple[int, np.ndarray | list[np.ndarray]]], list[np.ndarray]]:
+    """Merge every patch of each animal into one paint-section.
+
+    Water, coral, bubbles, and seaweed are open background (or leftover
+    pockets outside the animal boxes) and stay unpaintable.
+    """
+    groups: dict[int, list[np.ndarray]] = {}
+    dropped: list[np.ndarray] = []
+    for area, mask in regions:
+        if area < SEAWORLD_MIN_REGION_AREA:
+            dropped.append(mask)
+            continue
+        cx, cy = _centroid(mask)
+        cluster = seaworld_cluster(cx, cy)
+        if not cluster:
+            dropped.append(mask)
+            continue
+        groups.setdefault(cluster, []).append(mask)
+
+    merged: list[tuple[int, np.ndarray | list[np.ndarray]]] = []
+    for cluster in sorted(groups):
+        masks = groups[cluster]
+        total = int(sum(int((m > 0).sum()) for m in masks))
+        merged.append((total, masks if len(masks) > 1 else masks[0]))
+    merged.sort(key=lambda item: -item[0])
+    return merged, dropped
+
+
+def _region_union(mask_or_masks: np.ndarray | list[np.ndarray]) -> np.ndarray:
+    masks = mask_or_masks if isinstance(mask_or_masks, list) else [mask_or_masks]
+    union = masks[0].copy()
+    for mask in masks[1:]:
+        union = np.maximum(union, mask)
+    return union
+
+
 def compute_neighbors(
     kept: list[tuple[str, int, float, float, bool]], width: int, height: int
 ) -> dict[str, list[str]]:
@@ -205,10 +321,21 @@ def main() -> None:
 
     arr = np.array(Image.open(png).convert("RGB"))
     height, width = arr.shape[:2]
+    gap = GAP_CLOSE.get(picture, 1)
+    wave_forbidden = np.zeros((height, width), bool)
+    if picture in WHITE_FILL_ENCLOSED:
+        arr, wave_forbidden = white_fill_enclosed(
+            arr, INK_THRESH[picture], gap, picture
+        )
+        Image.fromarray(arr).save(png)
+
     is_white = (arr[:, :, 0] > 240) & (arr[:, :, 1] > 240) & (arr[:, :, 2] > 240)
 
-    gap = GAP_CLOSE.get(picture, 1)
-    if gap > 1:
+    if picture in WHITE_FILL_ENCLOSED:
+        # Gap-close already happened while finding interiors; do not dilate
+        # the colored background or it will nibble into animal fills.
+        detect_white = is_white.copy()
+    elif gap > 1:
         thick = cv2.dilate(
             (~is_white).astype(np.uint8),
             cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (gap, gap)),
@@ -225,33 +352,43 @@ def main() -> None:
     foreground = foreground_mask(is_white) if needs_foreground else None
 
     regions = collect_regions(picture, detect_white, is_white, foreground)
+    dropped_masks: list[np.ndarray] = []
+    if picture == "seaworld":
+        regions, dropped_masks = group_seaworld_regions(regions)
 
     section_ids: list[str] = []
     paths: list[str] = []
     kept: list[tuple[str, int, float, float, bool]] = []
-    region_masks = [mask for _, mask in regions]
-    for order, (area, mask) in enumerate(regions, start=1):
+    region_unions = [_region_union(mask) for _, mask in regions]
+    for order, ((area, mask), union) in enumerate(zip(regions, region_unions), start=1):
         # Prefix with the picture id: several pictures can be in the DOM at
         # once (home previews), and ids must be document-unique.
         section_id = f"{picture}-shape{order:02d}"
         forbidden = np.zeros((height, width), bool)
-        for other in region_masks:
-            if other is not mask:
+        for other in region_unions:
+            if other is not union:
                 forbidden |= other > 0
-        expanded = expand_under_outline(mask, is_white, forbidden)
-        contours, _ = cv2.findContours(expanded, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        keep = [c for c in contours if cv2.contourArea(c) >= 25]
-        if not keep:
+        for extra in dropped_masks:
+            forbidden |= extra > 0
+        # Never expand paint fills into the pre-colored background (waves).
+        forbidden |= wave_forbidden
+        submasks = mask if isinstance(mask, list) else [mask]
+        path_parts: list[str] = []
+        for sub in submasks:
+            expanded = expand_under_outline(sub, is_white, forbidden)
+            contours, _ = cv2.findContours(expanded, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            path_parts.extend(contour_path(c) for c in contours if cv2.contourArea(c) >= 25)
+        if not path_parts:
             continue
-        d = " ".join(contour_path(c) for c in keep)
+        d = " ".join(path_parts)
         section_ids.append(section_id)
         paths.append(f'  <path id="{section_id}" class="paint-section" fill="#fff" d="{d}"/>')
-        ys, xs = np.nonzero(mask)
-        is_bg = foreground is not None and not bool(foreground[mask > 0].any())
+        ys, xs = np.nonzero(union)
+        is_bg = foreground is not None and not bool(foreground[union > 0].any())
         kept.append((section_id, area, float(xs.mean()), float(ys.mean()), is_bg))
 
     display_name = DISPLAY_NAMES.get(picture, picture.capitalize())
-    art_href = f"assets/pictures/{picture}-art.png"
+    art_href = f"{picture}-art.png"
     svg = "\n".join(
         [
             f'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" '

@@ -188,52 +188,11 @@ const PICTURE_CATALOG = {
     ]
   },
   seaworld: {
-    name: 'Seaworld',
-    viewBox: '0 0 1000 600',
+    name: 'Sea World',
+    viewBox: '0 0 794 794',
     sections: [
-      'seaworld-octoHead', 'seaworld-octoTent1', 'seaworld-octoTent2', 'seaworld-octoTent3', 'seaworld-octoTent4', 'seaworld-octoTent5', 'seaworld-octoTent6',
-      'seaworld-fishBody', 'seaworld-fishTail', 'seaworld-fishFinTop', 'seaworld-fishFinBottom',
-      'seaworld-dolphinBody', 'seaworld-dolphinBelly', 'seaworld-dolphinFinDorsal', 'seaworld-dolphinFlipper', 'seaworld-dolphinTail', 'seaworld-dolphinSplash',
-      'seaworld-crabBody', 'seaworld-crabClawLeft', 'seaworld-crabClawRight', 'seaworld-crabLegsLeft', 'seaworld-crabLegsRight', 'seaworld-crabEyeLeft', 'seaworld-crabEyeRight',
-      'seaworld-whaleBody', 'seaworld-whaleBelly', 'seaworld-whaleTail', 'seaworld-whaleSpout'
-    ],
-    // Neighbor groups stay inside one animal so a clumsy tap never colors a
-    // different creature. The blue wave background is decor, not a section.
-    neighbors: {
-      // Octopus: head pairs with the middle tentacles; tentacles chain sideways.
-      'seaworld-octoHead': ['seaworld-octoTent3', 'seaworld-octoTent4'],
-      'seaworld-octoTent1': ['seaworld-octoTent2', 'seaworld-octoHead'],
-      'seaworld-octoTent2': ['seaworld-octoTent1', 'seaworld-octoTent3'],
-      'seaworld-octoTent3': ['seaworld-octoTent2', 'seaworld-octoHead'],
-      'seaworld-octoTent4': ['seaworld-octoTent5', 'seaworld-octoHead'],
-      'seaworld-octoTent5': ['seaworld-octoTent4', 'seaworld-octoTent6'],
-      'seaworld-octoTent6': ['seaworld-octoTent5', 'seaworld-octoHead'],
-      // Fish
-      'seaworld-fishBody': ['seaworld-fishFinTop', 'seaworld-fishFinBottom'],
-      'seaworld-fishTail': ['seaworld-fishBody', 'seaworld-fishFinTop'],
-      'seaworld-fishFinTop': ['seaworld-fishBody', 'seaworld-fishTail'],
-      'seaworld-fishFinBottom': ['seaworld-fishBody', 'seaworld-fishTail'],
-      // Dolphin
-      'seaworld-dolphinBody': ['seaworld-dolphinFinDorsal', 'seaworld-dolphinTail'],
-      'seaworld-dolphinBelly': ['seaworld-dolphinBody', 'seaworld-dolphinFlipper'],
-      'seaworld-dolphinFinDorsal': ['seaworld-dolphinBody', 'seaworld-dolphinTail'],
-      'seaworld-dolphinFlipper': ['seaworld-dolphinBelly', 'seaworld-dolphinBody'],
-      'seaworld-dolphinTail': ['seaworld-dolphinBody', 'seaworld-dolphinSplash'],
-      'seaworld-dolphinSplash': ['seaworld-dolphinTail', 'seaworld-dolphinBody'],
-      // Crab
-      'seaworld-crabBody': ['seaworld-crabLegsLeft', 'seaworld-crabLegsRight'],
-      'seaworld-crabClawLeft': ['seaworld-crabBody', 'seaworld-crabLegsLeft'],
-      'seaworld-crabClawRight': ['seaworld-crabBody', 'seaworld-crabLegsRight'],
-      'seaworld-crabLegsLeft': ['seaworld-crabBody', 'seaworld-crabClawLeft'],
-      'seaworld-crabLegsRight': ['seaworld-crabBody', 'seaworld-crabClawRight'],
-      'seaworld-crabEyeLeft': ['seaworld-crabEyeRight', 'seaworld-crabBody'],
-      'seaworld-crabEyeRight': ['seaworld-crabEyeLeft', 'seaworld-crabBody'],
-      // Whale
-      'seaworld-whaleBody': ['seaworld-whaleBelly', 'seaworld-whaleTail'],
-      'seaworld-whaleBelly': ['seaworld-whaleBody', 'seaworld-whaleTail'],
-      'seaworld-whaleTail': ['seaworld-whaleBody', 'seaworld-whaleBelly'],
-      'seaworld-whaleSpout': ['seaworld-whaleBody', 'seaworld-whaleBelly']
-    }
+      'seaworld-shape01', 'seaworld-shape02', 'seaworld-shape03', 'seaworld-shape04', 'seaworld-shape05', 'seaworld-shape06', 'seaworld-shape07', 'seaworld-shape08'
+    ]
   }
 };
 
@@ -241,8 +200,7 @@ const STANDALONE_PICTURE_IDS = ['butterfly', 'giraffe', 'christmasTree', 'turtle
 
 const COMING_SOON_ITEMS = [
   { id: 'fish', label: 'Fish' },
-  { id: 'land', label: 'Land World' },
-  { id: 'sea', label: 'Sea World' }
+  { id: 'land', label: 'Land World' }
 ];
 
 const ALL_PICTURE_IDS = Object.keys(PICTURE_CATALOG);
